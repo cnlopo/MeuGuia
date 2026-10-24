@@ -1,0 +1,29 @@
+MEUGUIA - ESP8266 + NEO-6M + motores de vibracao
+
+ARQUIVOS
+- MeuGuia_ESP8266.ino: aplicacao principal, servidor web, geocodificacao, GPS e vibracao.
+- navegacao.c / navegacao.h: modulo original de calculo e estados de proximidade.
+
+ANTES DE COMPILAR
+1. Abra MeuGuia_ESP8266.ino na Arduino IDE.
+2. Na secao CONFIGURACAO, troque WIFI_SSID e WIFI_PASSWORD.
+3. Selecione uma placa ESP8266 NodeMCU (ou ajuste os pinos para sua placa).
+4. Instale as bibliotecas: TinyGPSPlus, ArduinoJson (versao 6.x recomendada), ESPAsyncWebServer e ESPAsyncTCP para ESP8266.
+5. Compile e envie. Abra o Monitor Serial em 115200 baud.
+6. Acesse o IP mostrado no Monitor Serial e informe o endereco completo, incluindo cidade/UF.
+
+LIGACOES ASSUMIDAS (NodeMCU)
+- NEO-6M TX -> D1 (RX de SoftwareSerial)
+- NEO-6M RX -> D2 (TX de SoftwareSerial, opcional)
+- Motor 1 -> D5 por transistor/driver
+- Motor 2 -> D6 por transistor/driver
+- GND do GPS e do circuito devem ser comuns.
+
+IMPORTANTE
+- Nao alimente motores de vibracao diretamente pelos pinos do ESP8266. Use transistor/driver, diodo quando apropriado e alimentacao dimensionada para os motores.
+- O codigo original de GPS era para ESP32; a serial foi adaptada para SoftwareSerial no ESP8266.
+- O endereco digitado e convertido em coordenadas pelo Nominatim/OpenStreetMap. Inclua cidade e estado para evitar resultados ambiguos. Respeite a politica de uso do servico; nao faca requisicoes repetidas em alta frequencia.
+- A consulta HTTPS usa setInsecure() para simplificar o prototipo. Para uma versao final, valide o certificado TLS.
+- O servidor web e acessivel na rede Wi-Fi configurada. Este sketch nao cria uma rede Wi-Fi propria (modo access point).
+- Os padroes de vibracao foram definidos nesta integracao como uma interpretacao simples dos niveis existentes: PREPARAR=1 pulso, DAR_SINAL=2, CHEGANDO=3, PASSOU=4 pulsos curtos uma vez. Ajuste duracoes conforme testes com o hardware.
+- Teste primeiro em ambiente seguro, comparando a posicao do GPS com coordenadas conhecidas. A precisao do GPS pode variar e o geocodificador pode devolver o centro de uma rua, nao necessariamente o ponto exato do onibus.
