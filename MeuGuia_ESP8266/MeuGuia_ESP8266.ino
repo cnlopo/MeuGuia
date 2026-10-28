@@ -1,15 +1,3 @@
-/*
-  MeuGuia - ESP8266 + GPS NEO-6M + motores de vibracao
-  Projeto Arduino IDE. Ajuste Wi-Fi e pinos na secao CONFIGURACAO.
-
-  Hardware assumido (NodeMCU ESP8266):
-    GPS TX -> D1 (RX do ESP8266)
-    GPS RX -> D2 (TX do ESP8266, opcional)
-    Motor 1 -> D5 via transistor/driver
-    Motor 2 -> D6 via transistor/driver
-  Nao conecte motores diretamente aos GPIOs; use transistor/driver e fonte adequada.
-*/
-
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -23,17 +11,15 @@
 #include <TinyGPS++.h>
 #include "navegacao.h"
 
-// ===== CONFIGURACAO =====
 const char* WIFI_SSID = "SEU_WIFI";
 const char* WIFI_PASSWORD = "SUA_SENHA";
 const char* NOMINATIM_USER_AGENT = "MeuGuia-ESP8266/1.0";
 
-static const uint8_t GPS_RX_PIN = D1; // ligar ao TX do NEO-6M
-static const uint8_t GPS_TX_PIN = D2; // ligar ao RX do NEO-6M (opcional)
+static const uint8_t GPS_RX_PIN = D1;
+static const uint8_t GPS_TX_PIN = D2;
 static const uint8_t MOTOR_1_PIN = D5;
 static const uint8_t MOTOR_2_PIN = D6;
 static const uint32_t INTERVALO_GPS_MS = 1000;
-// =========================
 
 AsyncWebServer server(80);
 SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
@@ -45,6 +31,10 @@ double destinoLat = 0.0;
 double destinoLng = 0.0;
 uint32_t ultimaLeituraGPS = 0;
 NivelProximidade nivelAnterior = NIVEL_LONGE;
+volatile bool buscaPendente = false;
+volatile bool buscando = false;
+String enderecoPendente = "";
+bool ultimaBuscaOk = false;
 
 const char MAIN_PAGE[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
@@ -96,7 +86,6 @@ void pararVibracao() {
   digitalWrite(MOTOR_2_PIN, LOW);
 }
 
-// Padroes repetidos sem delay(), para nao bloquear a leitura do GPS.
 void atualizarVibracao(NivelProximidade nivel) {
   static NivelProximidade nivelAtivo = NIVEL_LONGE;
   static uint32_t inicioCiclo = 0;
@@ -118,7 +107,6 @@ void atualizarVibracao(NivelProximidade nivel) {
     return;
   }
 
-  // PREPARAR: 1 pulso; DAR_SINAL: 2; CHEGANDO: 3; PASSOU: 4 pulsos curtos uma vez.
   int quantidade = (nivel == NIVEL_PREPARAR) ? 1 :
                    (nivel == NIVEL_DAR_SINAL) ? 2 :
                    (nivel == NIVEL_CHEGANDO) ? 3 : 4;
@@ -128,7 +116,7 @@ void atualizarVibracao(NivelProximidade nivel) {
 
   if (nivel == NIVEL_PASSOU && pulso >= quantidade && !vibrando) {
     pararVibracao();
-    return; // alerta de PASSOU ocorre apenas uma vez
+    return;
   }
 
   if (vibrando) {
@@ -149,30 +137,29 @@ void atualizarVibracao(NivelProximidade nivel) {
       transicaoMs = agora;
     }
   } else if (nivel != NIVEL_PASSOU && agora - inicioCiclo >= 1800) {
-    // Reinicia o padrao enquanto estiver no mesmo nivel.
     pulso = 0;
     transicaoMs = agora;
+    inicioCiclo = agora;
   }
 }
 
 bool consultarEndereco(const String& endereco) {
   if (WiFi.status() != WL_CONNECTED) return false;
 
-  // Nominatim aceita busca livre por q; o endereco deve incluir cidade/UF para melhorar o resultado.
   String url = "https://nominatim.openstreetmap.org/search?q=" + codificarURL(endereco) + "&format=json&limit=1";
   WiFiClientSecure client;
-  client.setInsecure(); // simplifica a conexao TLS; para produto final, validar certificado e recomendavel.
+  client.setInsecure();
   HTTPClient http;
   http.setTimeout(12000);
   http.begin(client, url);
-  http.addHeader("User-Agent", NOMINATIM_USER_AGENT);
+  http.setUserAgent(NOMINATIM_USER_AGENT);
   Serial.println("Consultando geocodificacao do endereco...");
   int codigoHTTP = http.GET();
   bool sucesso = false;
 
   if (codigoHTTP == HTTP_CODE_OK) {
     String payload = http.getString();
-    DynamicJsonDocument doc(3072); // compatibilidade com ArduinoJson 6
+    JsonDocument doc;
     DeserializationError erro = deserializeJson(doc, payload);
     if (!erro && doc.is<JsonArray>() && doc.size() > 0) {
       JsonObject item = doc[0];
@@ -212,9 +199,17 @@ void configurarRotasWeb() {
       return;
     }
 
-    // A consulta externa pode levar alguns segundos; por isso a resposta informa o resultado.
-    bool sucesso = consultarEndereco(endereco);
-    if (sucesso) {
+    enderecoPendente = endereco;
+    buscaPendente = true;
+    request->send(200, "text/html; charset=utf-8", "<meta charset='UTF-8'><meta http-equiv='refresh' content='3;url=/resultado'><h2>Buscando o endereco...</h2><p>Aguarde alguns segundos.</p>");
+  });
+
+  server.on("/resultado", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (buscaPendente || buscando) {
+      request->send(200, "text/html; charset=utf-8", "<meta charset='UTF-8'><meta http-equiv='refresh' content='3'><h2>Ainda buscando o endereco...</h2>");
+      return;
+    }
+    if (ultimaBuscaOk) {
       String resposta = "<!DOCTYPE html><html lang='pt-BR'><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><body><h2>Destino configurado</h2><p>";
       resposta += enderecoDestino;
       resposta += "</p><p>Latitude: " + String(destinoLat, 6) + "<br>Longitude: " + String(destinoLng, 6) + "</p><a href='/'>Voltar</a></body></html>";
@@ -261,6 +256,15 @@ void setup() {
 }
 
 void loop() {
+  if (buscaPendente) {
+    String endereco = enderecoPendente;
+    buscaPendente = false;
+    buscando = true;
+    pararVibracao();
+    ultimaBuscaOk = consultarEndereco(endereco);
+    buscando = false;
+  }
+
   while (gpsSerial.available() > 0) gps.encode(gpsSerial.read());
   MDNS.update();
 
@@ -280,7 +284,6 @@ void loop() {
     }
   }
 
-  // Atualiza o padrao de vibracao em todas as iteracoes, sem depender da frequencia do GPS.
   if (destinoConfigurado) atualizarVibracao(estadoNavegacao.nivel);
   else pararVibracao();
   yield();
