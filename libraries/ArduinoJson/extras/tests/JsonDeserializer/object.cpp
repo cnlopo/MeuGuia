@@ -314,7 +314,7 @@ TEST_CASE("deserialize JSON object") {
               });
     }
 
-    SECTION("Repeated key with zero copy mode") {  // issue #1697
+    SECTION("Repeated key with zero copy mode") {
       char input[] = "{a:{b:{c:1}},a:2}";
       DeserializationError err = deserializeJson(doc, input);
 

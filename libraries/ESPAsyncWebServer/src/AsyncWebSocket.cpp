@@ -66,7 +66,6 @@ size_t webSocketSendFrame(AsyncClient *client, bool final, uint8_t opcode, bool 
 
   uint8_t *buf = (uint8_t*)malloc(headLen);
   if(buf == NULL){
-    //os_printf("could not malloc %u bytes for frame header\n", headLen);
     return 0;
   }
 
@@ -85,7 +84,6 @@ size_t webSocketSendFrame(AsyncClient *client, bool final, uint8_t opcode, bool 
     memcpy(buf + (headLen - 4), mbuf, 4);
   }
   if(client->add((const char *)buf, headLen) != headLen){
-    //os_printf("error adding %lu header bytes\n", headLen);
     free(buf);
     return 0;
   }
@@ -98,19 +96,12 @@ size_t webSocketSendFrame(AsyncClient *client, bool final, uint8_t opcode, bool 
         data[i] = data[i] ^ mbuf[i%4];
     }
     if(client->add((const char *)data, len) != len){
-      //os_printf("error adding %lu data bytes\n", len);
       return 0;
     }
   }
   if (!client->send()) return 0;
   return len;
 }
-
-
-/*
- *    AsyncWebSocketMessageBuffer
- */
-
 
 
 AsyncWebSocketMessageBuffer::AsyncWebSocketMessageBuffer()
@@ -224,10 +215,6 @@ bool AsyncWebSocketMessageBuffer::reserve(size_t size)
 
 
 
-/*
- * Control Frame
- */
-
 class AsyncWebSocketControl {
   private:
     uint8_t _opcode;
@@ -265,11 +252,6 @@ class AsyncWebSocketControl {
       return webSocketSendFrame(client, true, _opcode & 0x0F, _mask, _data, _len);
     }
 };
-
-/*
- * Basic Buffered Message
- */
-
 
 AsyncWebSocketBasicMessage::AsyncWebSocketBasicMessage(const char * data, size_t len, uint8_t opcode, bool mask)
   :_len(len)
@@ -353,25 +335,6 @@ AsyncWebSocketBasicMessage::~AsyncWebSocketBasicMessage() {
   return sent;
 }
 
-// bool AsyncWebSocketBasicMessage::reserve(size_t size) {
-//   if (size) {
-//     _data = (uint8_t*)malloc(size +1);
-//     if (_data) {
-//       memset(_data, 0, size);
-//       _len = size;
-//       _status = WS_MSG_SENDING;
-//       return true;
-//     }
-//   }
-//   return false;
-//  }
-
-
-/*
- * AsyncWebSocketMultiMessage Message
- */
-
-
 AsyncWebSocketMultiMessage::AsyncWebSocketMultiMessage(AsyncWebSocketMessageBuffer * buffer, uint8_t opcode, bool mask)
   :_len(0)
   ,_sent(0)
@@ -389,7 +352,6 @@ AsyncWebSocketMultiMessage::AsyncWebSocketMultiMessage(AsyncWebSocketMessageBuff
     _data = buffer->get();
     _len = buffer->length();
     _status = WS_MSG_SENDING;
-    //ets_printf("M: %u\n", _len);
   } else {
     _status = WS_MSG_ERROR;
   }
@@ -399,7 +361,7 @@ AsyncWebSocketMultiMessage::AsyncWebSocketMultiMessage(AsyncWebSocketMessageBuff
 
 AsyncWebSocketMultiMessage::~AsyncWebSocketMultiMessage() {
   if (_WSbuffer) {
-    (*_WSbuffer)--; // decreases the counter.
+    (*_WSbuffer)--;
   }
 }
 
@@ -409,7 +371,6 @@ AsyncWebSocketMultiMessage::~AsyncWebSocketMultiMessage() {
   if(_sent >= _len && _acked >= _ack){
     _status = WS_MSG_SENT;
   }
-  //ets_printf("A: %u\n", len);
 }
  size_t AsyncWebSocketMultiMessage::send(AsyncClient *client)  {
   if(_status != WS_MSG_SENDING)
@@ -423,7 +384,6 @@ AsyncWebSocketMultiMessage::~AsyncWebSocketMultiMessage() {
   }
   if(_sent > _len){
       _status = WS_MSG_ERROR;
-      //ets_printf("E: %u > %u\n", _sent, _len);
       return 0;
   }
 
@@ -437,8 +397,6 @@ AsyncWebSocketMultiMessage::~AsyncWebSocketMultiMessage() {
   _sent += toSend;
   _ack += toSend + ((toSend < 126)?2:4) + (_mask * 4);
 
-  //ets_printf("W: %u %u\n", _sent - toSend, toSend);
-
   bool final = (_sent == _len);
   uint8_t* dPtr = (uint8_t*)(_data + (_sent - toSend));
   uint8_t opCode = (toSend && _sent == toSend)?_opcode:(uint8_t)WS_CONTINUATION;
@@ -446,18 +404,13 @@ AsyncWebSocketMultiMessage::~AsyncWebSocketMultiMessage() {
   size_t sent = webSocketSendFrame(client, final, opCode, _mask, dPtr, toSend);
   _status = WS_MSG_SENDING;
   if(toSend && sent != toSend){
-      //ets_printf("E: %u != %u\n", toSend, sent);
       _sent -= (toSend - sent);
       _ack -= (toSend - sent);
   }
-  //ets_printf("S: %u %u\n", _sent, sent);
   return sent;
 }
 
 
-/*
- * Async WebSocket Client
- */
  const char * AWSC_PING_PAYLOAD = "ESPAsyncWebServer-PING";
  const size_t AWSC_PING_PAYLOAD_LEN = 22;
 
@@ -678,16 +631,13 @@ void AsyncWebSocketClient::_onData(void *pbuf, size_t plen){
       } else if(_pinfo.opcode == WS_PONG){
         if(datalen != AWSC_PING_PAYLOAD_LEN || memcmp(AWSC_PING_PAYLOAD, data, AWSC_PING_PAYLOAD_LEN) != 0)
           _server->_handleEvent(this, WS_EVT_PONG, NULL, data, datalen);
-      } else if(_pinfo.opcode < 8){//continuation or text/binary frame
+      } else if(_pinfo.opcode < 8){
         _server->_handleEvent(this, WS_EVT_DATA, (void *)&_pinfo, data, datalen);
       }
     } else {
-      //os_printf("frame error: len: %u, index: %llu, total: %llu\n", datalen, _pinfo.index, _pinfo.len);
-      //what should we do?
       break;
     }
 
-    // restore byte as _handleEvent may have added a null terminator i.e., data[len] = 0;
     if (datalen > 0)
       data[datalen] = datalast;
 
@@ -840,10 +790,6 @@ uint16_t AsyncWebSocketClient::remotePort() {
 }
 
 
-
-/*
- * Async Web Socket - Each separate socket location
- */
 
 AsyncWebSocket::AsyncWebSocket(const String& url)
   :_url(url)
@@ -1187,7 +1133,6 @@ void AsyncWebSocket::handleRequest(AsyncWebServerRequest *request){
   AsyncWebServerResponse *response = new AsyncWebSocketResponse(key->value(), this);
   if(request->hasHeader(WS_STR_PROTOCOL)){
     AsyncWebHeader* protocol = request->getHeader(WS_STR_PROTOCOL);
-    //ToDo: check protocol
     response->addHeader(WS_STR_PROTOCOL, protocol->value());
   }
   request->send(response);
@@ -1229,11 +1174,6 @@ void AsyncWebSocket::_cleanBuffers()
 AsyncWebSocket::AsyncWebSocketClientLinkedList AsyncWebSocket::getClients() const {
   return _clients;
 }
-
-/*
- * Response to Web Socket request - sends the authorization and detaches the TCP Client from the web server
- * Authentication code from https://github.com/Links2004/arduinoWebSockets/blob/master/src/WebSockets.cpp#L480
- */
 
 AsyncWebSocketResponse::AsyncWebSocketResponse(const String& key, AsyncWebSocket *server){
   _server = server;

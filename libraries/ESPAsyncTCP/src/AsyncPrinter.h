@@ -70,4 +70,4 @@ class AsyncPrinter: public Print {
     void _attachCallbacks();
 };
 
-#endif /* ASYNCPRINTER_H_ */
+#endif

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdlib.h>  // for size_t
+#include <stdlib.h>
 
 #include <ArduinoJson/Configuration.hpp>
 #include "math.hpp"

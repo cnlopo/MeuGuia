@@ -189,7 +189,7 @@ TEST_CASE("unsigned char[]") {
   }
 
   SECTION("MemberProxy") {
-    SECTION("operator=") {  // issue #416
+    SECTION("operator=") {
       unsigned char value[] = "world";
 
       JsonDocument doc;

@@ -37,7 +37,6 @@ double distancia_metros(double latitude_origem, double longitude_origem, double 
     return 2.0 * RAIO_TERRA_METROS * asin(sqrt(haversine));
 }
 
-/* A subtração em uint32_t continua certa quando o millis() volta a zero. */
 static double segundos_entre(uint32_t antes_ms, uint32_t agora_ms) {
     return (double)(agora_ms - antes_ms) / 1000.0;
 }
@@ -88,7 +87,6 @@ static bool aceitar_leitura(EstadoNavegacao *estado, double latitude, double lon
     if (estado->saltos_seguidos < LEITURAS_CONFIRMAR_SALTO) {
         return false;
     }
-    /* A diferença de distância do salto não é movimento do ônibus e não pode virar ritmo. */
     esvaziar_janela(estado);
     guardar_posicao_valida(estado, latitude, longitude, tempo_ms);
     return true;
@@ -103,7 +101,6 @@ static void guardar_na_janela(EstadoNavegacao *estado, double distancia, uint32_
     }
 }
 
-/* Distância igual ao limite já conta como dentro do nível. */
 static NivelProximidade nivel_pela_distancia(double distancia) {
     if (distancia <= LIMITE_CHEGANDO_METROS) {
         return NIVEL_CHEGANDO;
@@ -117,7 +114,6 @@ static NivelProximidade nivel_pela_distancia(double distancia) {
     return NIVEL_LONGE;
 }
 
-/* De DAR_SINAL em diante o nível não volta atrás, então só PREPARAR precisa de margem para sair. */
 static NivelProximidade nivel_com_histerese(NivelProximidade atual, double distancia) {
     NivelProximidade pela_distancia = nivel_pela_distancia(distancia);
     if (pela_distancia >= atual) {
@@ -141,11 +137,9 @@ static NivelProximidade nivel_pelo_ritmo(const EstadoNavegacao *estado) {
     double ritmo_m_s =
         (estado->distancias_recentes[mais_nova] - estado->distancias_recentes[mais_antiga]) /
         segundos;
-    /* Ritmo exatamente no limite conta como pessoa a pé. */
     return ritmo_m_s > LIMITE_VELOCIDADE_ONIBUS_M_S ? NIVEL_PASSOU : NIVEL_ENCERRADA;
 }
 
-/* Se o ônibus sai de novo da zona do primeiro aviso, a viagem para este destino acabou. */
 static NivelProximidade nivel_depois_de_passar(const EstadoNavegacao *estado, double distancia) {
     if (distancia > LIMITE_PREPARAR_METROS) {
         return NIVEL_ENCERRADA;

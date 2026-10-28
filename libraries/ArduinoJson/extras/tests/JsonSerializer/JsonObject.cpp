@@ -15,7 +15,7 @@ static void checkObject(const JsonObject obj, const std::string& expected) {
 
   REQUIRE(expected.size() == measuredLen);
   REQUIRE(expected.size() == actualLen);
-  REQUIRE(actual[actualLen] == 0);  // serializeJson() adds a null terminator
+  REQUIRE(actual[actualLen] == 0);
   REQUIRE(expected == actual);
 }
 

@@ -12,7 +12,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// Grants access to the internal variant API
 class VariantAttorney {
  public:
   template <typename TClient>

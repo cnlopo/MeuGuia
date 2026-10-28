@@ -56,7 +56,7 @@ TEST_CASE("Printable") {
     JsonDocument doc(&spy);
     const char* value = "example";
 
-    doc.set(666);  // to make sure we override the value
+    doc.set(666);
 
     SECTION("Via Print::write(char)") {
       PrintableString<PrintOneCharacterAtATime> printable(value);
@@ -90,7 +90,7 @@ TEST_CASE("Printable") {
     JsonDocument doc(&spy);
     const char* value = "hello world";
 
-    doc.set(666);  // to make sure we override the value
+    doc.set(666);
 
     SECTION("Via Print::write(char)") {
       PrintableString<PrintOneCharacterAtATime> printable(value);
@@ -125,9 +125,9 @@ TEST_CASE("Printable") {
     TimebombAllocator timebomb(1);
     SpyingAllocator spy(&timebomb);
     JsonDocument doc(&spy);
-    const char* value = "Lorem ipsum dolor sit amet, cons";  // > 31 chars
+    const char* value = "Lorem ipsum dolor sit amet, cons";
 
-    doc.set(666);  // to make sure we override the value
+    doc.set(666);
 
     SECTION("Via Print::write(char)") {
       PrintableString<PrintOneCharacterAtATime> printable(value);

@@ -13,7 +13,7 @@
 namespace my {
 using ArduinoJson::detail::isinf;
 using ArduinoJson::detail::isnan;
-}  // namespace my
+}
 
 TEST_CASE("deserialize an integer") {
   JsonDocument doc;
@@ -24,7 +24,7 @@ TEST_CASE("deserialize an integer") {
       REQUIRE(err == DeserializationError::Ok);
       REQUIRE(doc.is<int>() == true);
       REQUIRE(doc.as<int>() == 0);
-      REQUIRE(doc.as<std::string>() == "0");  // issue #808
+      REQUIRE(doc.as<std::string>() == "0");
     }
 
     SECTION("Negative") {

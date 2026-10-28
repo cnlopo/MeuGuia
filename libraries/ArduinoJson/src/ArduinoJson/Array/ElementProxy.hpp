@@ -8,8 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A proxy class to get or set an element of an array.
-// https://arduinojson.org/v7/api/jsonarray/subscript/
 template <typename TUpstream>
 class ElementProxy : public VariantRefBase<ElementProxy<TUpstream>>,
                      public VariantOperators<ElementProxy<TUpstream>> {
@@ -45,10 +43,8 @@ class ElementProxy : public VariantRefBase<ElementProxy<TUpstream>>,
   }
 
  private:
-  // clang-format off
-  ElementProxy(const ElementProxy& src)  // Error here? See https://arduinojson.org/v7/proxy-non-copyable/
+  ElementProxy(const ElementProxy& src)
       : upstream_(src.upstream_), index_(src.index_) {}
-  // clang-format on
 
   ResourceManager* getResourceManager() const {
     return VariantAttorney::getResourceManager(upstream_);

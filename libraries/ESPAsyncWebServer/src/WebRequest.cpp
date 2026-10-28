@@ -103,34 +103,30 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
   while (true) {
 
   if(_parseState < PARSE_REQ_BODY){
-    // Find new line in buf
     char *str = (char*)buf;
     for (i = 0; i < len; i++) {
       if (str[i] == '\n') {
         break;
       }
     }
-    if (i == len) { // No new line, just add the buffer in _temp
+    if (i == len) {
       char ch = str[len-1];
       str[len-1] = 0;
       _temp.reserve(_temp.length()+len);
       _temp.concat(str);
       _temp.concat(ch);
-    } else { // Found new line - extract it and parse
-      str[i] = 0; // Terminate the string at the end of the line.
+    } else {
+      str[i] = 0;
       _temp.concat(str);
       _temp.trim();
       _parseLine();
       if (++i < len) {
-        // Still have more buffer to process
         buf = str+i;
         len-= i;
         continue;
       }
     }
   } else if(_parseState == PARSE_REQ_BODY){
-    // A handler should be already attached at this point in _parseLine function.
-    // If handler does nothing (_onRequest is NULL), we don't need to really parse the body.
     const bool needParse = _handler && !_handler->isRequestHandlerTrivial();
     if(_isMultipart){
       if(needParse){
@@ -154,7 +150,6 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
         }
       }
       if(!_isPlainPost) {
-        //check if authenticated before calling the body
         if(_handler) _handler->handleBody(this, (uint8_t*)buf, len, _parsedLength, _contentLength);
         _parsedLength += len;
       } else if(needParse) {
@@ -169,7 +164,6 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
     }
     if(_parsedLength == _contentLength){
       _parseState = PARSE_REQ_END;
-      //check if authenticated before calling handleRequest and request auth instead
       if(_handler) _handler->handleRequest(this);
       else send(501);
     }
@@ -179,7 +173,7 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
 }
 
 void AsyncWebServerRequest::_removeNotInterestingHeaders(){
-  if (_interestingHeaders.containsIgnoreCase("ANY")) return; // nothing to do
+  if (_interestingHeaders.containsIgnoreCase("ANY")) return;
   for(const auto& header: _headers){
       if(!_interestingHeaders.containsIgnoreCase(header->name().c_str())){
         _headers.remove(header);
@@ -188,14 +182,12 @@ void AsyncWebServerRequest::_removeNotInterestingHeaders(){
 }
 
 void AsyncWebServerRequest::_onPoll(){
-  //os_printf("p\n");
   if(_response != NULL && _client != NULL && _client->canSend() && !_response->_finished()){
     _response->_ack(this, 0, 0);
   }
 }
 
 void AsyncWebServerRequest::_onAck(size_t len, uint32_t time){
-  //os_printf("a:%u:%u\n", len, time);
   if(_response != NULL){
     if(!_response->_finished()){
       _response->_ack(this, len, time);
@@ -213,7 +205,6 @@ void AsyncWebServerRequest::_onError(int8_t error){
 
 void AsyncWebServerRequest::_onTimeout(uint32_t time){
   (void)time;
-  //os_printf("TIMEOUT: %u, state: %s\n", time, _client->stateToString());
   _client->close();
 }
 
@@ -222,7 +213,6 @@ void AsyncWebServerRequest::onDisconnect (ArDisconnectHandler fn){
 }
 
 void AsyncWebServerRequest::_onDisconnect(){
-  //os_printf("d\n");
   if(_onDisconnectfn) {
       _onDisconnectfn();
     }
@@ -252,7 +242,6 @@ void AsyncWebServerRequest::_addGetParams(const String& params){
 }
 
 bool AsyncWebServerRequest::_parseReqHead(){
-  // Split the head into method, url and version
   int index = _temp.indexOf(' ');
   String m = _temp.substring(0, index);
   index = _temp.indexOf(' ', index+1);
@@ -300,8 +289,8 @@ bool strContains(String src, String find, bool mindcase = true) {
   while (pos <= (slen - flen)) {
     for (i=0; i < flen; i++) {
       if (mindcase) {
-        if (src[pos+i] != find[i]) i = flen + 1; // no match
-      } else if (tolower(src[pos+i]) != tolower(find[i])) i = flen + 1; // no match
+        if (src[pos+i] != find[i]) i = flen + 1;
+      } else if (tolower(src[pos+i]) != tolower(find[i])) i = flen + 1;
     }
     if (i == flen) return true;
     pos++;
@@ -336,11 +325,9 @@ bool AsyncWebServerRequest::_parseReqHeader(){
       }
     } else {
       if(name.equalsIgnoreCase("Upgrade") && value.equalsIgnoreCase("websocket")){
-        // WebSocket request can be uniquely identified by header: [Upgrade: websocket]
         _reqconntype = RCT_WS;
       } else {
         if(name.equalsIgnoreCase("Accept") && strContains(value, "text/event-stream", false)){
-          // WebEvent request can be uniquely identified by header:  [Accept: text/event-stream]
           _reqconntype = RCT_EVENT;
         }
       }
@@ -370,7 +357,6 @@ void AsyncWebServerRequest::_handleUploadByte(uint8_t data, bool last){
   _itemBuffer[_itemBufferIndex++] = data;
 
   if(last || _itemBufferIndex == 1460){
-    //check if authenticated before calling the upload
     if(_handler)
       _handler->handleUpload(this, _itemFilename, _itemSize - _itemBufferIndex, _itemBuffer, _itemBufferIndex, false);
     _itemBufferIndex = 0;
@@ -459,7 +445,6 @@ void AsyncWebServerRequest::_parseMultipartPostByte(uint8_t data, bool last){
         _temp = String();
       } else {
         _multiParseState = WAIT_FOR_RETURN1;
-        //value starts from here
         _itemSize = 0;
         _itemStartIndex = _parsedLength;
         _itemValue = String();
@@ -511,7 +496,6 @@ void AsyncWebServerRequest::_parseMultipartPostByte(uint8_t data, bool last){
         _addParam(new AsyncWebParameter(_itemName, _itemValue, true));
       } else {
         if(_itemSize){
-          //check if authenticated before calling the upload
           if(_handler) _handler->handleUpload(this, _itemFilename, _itemSize - _itemBufferIndex, _itemBuffer, _itemBufferIndex, true);
           _itemBufferIndex = 0;
           _addParam(new AsyncWebParameter(_itemName, _itemFilename, true, true, _itemSize));
@@ -525,8 +509,7 @@ void AsyncWebServerRequest::_parseMultipartPostByte(uint8_t data, bool last){
     }
   } else if(_multiParseState == DASH3_OR_RETURN2){
     if(data == '-' && (_contentLength - _parsedLength - 4) != 0){
-      //os_printf("ERROR: The parser got to the end of the POST but is expecting %u bytes more!\nDrop an issue so we can have more info on the matter!\n", _contentLength - _parsedLength - 4);
-      _contentLength = _parsedLength + 4;//lets close the request gracefully
+      _contentLength = _parsedLength + 4;
     }
     if(data == '\r'){
       _multiParseState = EXPECT_FEED2;
@@ -565,7 +548,6 @@ void AsyncWebServerRequest::_parseLine(){
 
   if(_parseState == PARSE_REQ_HEADERS){
     if(!_temp.length()){
-      //end of headers
       _server->_rewriteRequest(this);
       _server->_attachHandler(this);
       _removeNotInterestingHeaders();
@@ -573,7 +555,6 @@ void AsyncWebServerRequest::_parseLine(){
         const char * response = "HTTP/1.1 100 Continue\r\n\r\n";
         _client->write(response, os_strlen(response));
       }
-      //check handler for authentication
       if(_contentLength){
         _parseState = PARSE_REQ_BODY;
       } else {
@@ -957,7 +938,7 @@ String AsyncWebServerRequest::urlDecode(const String& text) const {
   unsigned int len = text.length();
   unsigned int i = 0;
   String decoded = String();
-  decoded.reserve(len); // Allocate the string internal buffer - never longer from source text
+  decoded.reserve(len);
   while (i < len){
     char decodedChar;
     char encodedChar = text.charAt(i++);
@@ -968,7 +949,7 @@ String AsyncWebServerRequest::urlDecode(const String& text) const {
     } else if (encodedChar == '+') {
       decodedChar = ' ';
     } else {
-      decodedChar = encodedChar;  // normal ascii char
+      decodedChar = encodedChar;
     }
     decoded.concat(decodedChar);
   }

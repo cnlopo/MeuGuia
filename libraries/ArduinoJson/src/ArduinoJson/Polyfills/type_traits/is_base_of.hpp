@@ -10,11 +10,9 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that returns true if Derived inherits from TBase is an
-// integral type.
 template <typename TBase, typename TDerived>
 class is_base_of {
- protected:  // <- to avoid GCC's "all member functions in class are private"
+ protected:
   static int probe(const TBase*);
   static char probe(...);
 

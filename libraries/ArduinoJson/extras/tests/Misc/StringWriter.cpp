@@ -73,18 +73,15 @@ TEST_CASE("Writer<String>") {
 
   SECTION("write(char)") {
     SECTION("writes to temporary buffer") {
-      // accumulate in buffer
       writer.write('a');
       writer.write('b');
       writer.write('c');
       writer.write('d');
       REQUIRE(output == "");
 
-      // flush when full
       writer.write('e');
       REQUIRE(output == "abcd");
 
-      // flush on destruction
       writer.write('f');
       writer.~Writer();
       REQUIRE(output == "abcdef");
@@ -116,15 +113,12 @@ TEST_CASE("Writer<String>") {
     }
 
     SECTION("writes to temporary buffer") {
-      // accumulate in buffer
       print(writer, "abc");
       REQUIRE(output == "");
 
-      // flush when full, and continue to accumulate
       print(writer, "de");
       REQUIRE(output == "abcd");
 
-      // flush on destruction
       writer.~Writer();
       REQUIRE(output == "abcde");
     }
@@ -149,7 +143,7 @@ TEST_CASE("serializeJson(doc, String)") {
     REQUIRE(output == "{\"hello\":\"world\"}");
   }
 
-  SECTION("unsufficient capacity") {  // issue #1561
+  SECTION("unsufficient capacity") {
     output.limitCapacityTo(10);
     serializeJson(doc, output);
     REQUIRE(output == "{\"hello\"");

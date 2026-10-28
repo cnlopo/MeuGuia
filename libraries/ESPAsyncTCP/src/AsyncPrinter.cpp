@@ -45,7 +45,7 @@ AsyncPrinter::AsyncPrinter(AsyncClient *client, size_t txBufLen)
   _attachCallbacks();
   _tx_buffer = new (std::nothrow) cbuf(_tx_buffer_size);
   if(_tx_buffer == NULL) {
-    panic(); //What should we do?
+    panic();
   }
 }
 
@@ -150,13 +150,13 @@ size_t AsyncPrinter::write(const uint8_t *data, size_t len){
     while(connected() && !_client->canSend())
       delay(0);
     if(!connected())
-      return 0; // or len - toSend;
+      return 0;
     _sendBuffer();
     toSend -= toWrite;
   }
   _tx_buffer->write((const char*)(data+(len - toSend)), toSend);
   while(connected() && !_client->canSend()) delay(0);
-  if(!connected()) return 0; // or len - toSend;
+  if(!connected()) return 0;
   _sendBuffer();
   return len;
 }
@@ -179,7 +179,7 @@ size_t AsyncPrinter::_sendBuffer(){
     available= sendable;
   char *out = new (std::nothrow) char[available];
   if (out == NULL) {
-    panic(); // Connection should be aborted instead
+    panic();
   }
 
   _tx_buffer->read(out, available);

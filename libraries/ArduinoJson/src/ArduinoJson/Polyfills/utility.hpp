@@ -20,9 +20,6 @@ remove_reference_t<T>&& move(T&& t) {
   return static_cast<remove_reference_t<T>&&>(t);
 }
 
-// Polyfull for std::swap
-// Don't use the name "swap" because it makes calls ambiguous for types in the
-// detail namespace
 template <class T>
 void swap_(T& a, T& b) {
   T tmp = move(a);

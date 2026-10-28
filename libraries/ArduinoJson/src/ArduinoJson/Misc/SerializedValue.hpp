@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// A special type of data that can be used to insert pregenerated JSON portions.
 template <typename T>
 class SerializedValue {
  public:
@@ -22,7 +21,6 @@ class SerializedValue {
   }
 
   size_t size() const {
-    // CAUTION: the old Arduino String doesn't have size()
     return str_.length();
   }
 

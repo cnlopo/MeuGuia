@@ -162,13 +162,11 @@ inline Number parseNumber(const char* s) {
     }
   }
 
-  // avoid mantissa overflow
   while (mantissa > traits::mantissa_max) {
     mantissa /= 10;
     exponent_offset++;
   }
 
-  // remaing digits can't fit in the mantissa
   while (isdigit(*s)) {
     exponent_offset++;
     s++;
@@ -211,7 +209,6 @@ inline Number parseNumber(const char* s) {
   }
   exponent += exponent_offset;
 
-  // we should be at the end of the string, otherwise it's an error
   if (*s != '\0')
     return Number();
 

@@ -67,20 +67,16 @@ TEST_CASE("ResourceManager::allocVariant()") {
   SECTION("Try overflow pool counter") {
     ResourceManager resources;
 
-    // this test assumes SlotId is 8-bit; otherwise it consumes a lot of memory
-    // tyhe GitHub Workflow gets killed
     REQUIRE(NULL_SLOT == 255);
 
-    // fill all the pools
     for (SlotId i = 0; i < NULL_SLOT; i++) {
       auto slot = resources.allocVariant();
-      REQUIRE(slot.id() == i);  // or != NULL_SLOT
+      REQUIRE(slot.id() == i);
       REQUIRE(slot.ptr() != nullptr);
     }
 
     REQUIRE(resources.overflowed() == false);
 
-    // now all allocations should fail
     for (int i = 0; i < 10; i++) {
       auto slot = resources.allocVariant();
       REQUIRE(slot.id() == NULL_SLOT);

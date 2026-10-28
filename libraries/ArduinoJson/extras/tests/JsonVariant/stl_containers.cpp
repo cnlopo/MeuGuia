@@ -63,7 +63,7 @@ struct Converter<std::array<T, N>> {
     return result && size == N;
   }
 };
-}  // namespace ArduinoJson
+}
 
 TEST_CASE("vector<int>") {
   SECTION("toJson") {

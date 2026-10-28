@@ -6,7 +6,7 @@
 
 namespace my {
 using ArduinoJson::detail::isnan;
-}  // namespace my
+}
 
 TEST_CASE("ARDUINOJSON_ENABLE_NAN == 1") {
   JsonDocument doc;

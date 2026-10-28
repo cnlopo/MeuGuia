@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <stdint.h>  // int8_t, int16_t
+#include <stdint.h>
 
 #include <ArduinoJson/Namespace.hpp>
 

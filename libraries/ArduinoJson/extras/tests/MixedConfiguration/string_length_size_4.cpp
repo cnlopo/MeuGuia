@@ -73,7 +73,6 @@ TEST_CASE("ARDUINOJSON_STRING_LENGTH_SIZE == 4") {
       REQUIRE(err == DeserializationError::Ok);
     }
 
-    // https://oss-fuzz.com/testcase?key=5354792971993088
     SECTION("doesn't overflow if binary size == 0xFFFFFFFF") {
       auto input = "\xc6\xff\xff\xff\xff"_s;
 

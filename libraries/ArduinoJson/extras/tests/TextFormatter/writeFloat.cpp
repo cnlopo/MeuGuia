@@ -60,7 +60,6 @@ TEST_CASE("TextFormatter::writeFloat(double)") {
   }
 
   SECTION("Big exponent") {
-    // this test increases coverage of normalize()
     check<double>(1e255, "1e255");
     check<double>(1e-255, "1e-255");
   }
@@ -109,11 +108,11 @@ TEST_CASE("TextFormatter::writeFloat(float)") {
     check<float>(3.14159265359f, "3.141593");
   }
 
-  SECTION("999.9") {  // issue #543
+  SECTION("999.9") {
     check<float>(999.9f, "999.9");
   }
 
-  SECTION("24.3") {  // # issue #588
+  SECTION("24.3") {
     check<float>(24.3f, "24.3");
   }
 }

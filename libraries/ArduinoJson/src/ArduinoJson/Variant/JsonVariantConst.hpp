@@ -5,7 +5,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdint.h>  // for uint8_t
+#include <stdint.h>
 
 #include <ArduinoJson/Memory/ResourceManager.hpp>
 #include <ArduinoJson/Polyfills/type_traits.hpp>
@@ -17,12 +17,9 @@
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// Forward declarations.
 class JsonArray;
 class JsonObject;
 
-// A read-only reference to a value in a JsonDocument
-// https://arduinojson.org/v7/api/jsonarrayconst/
 class JsonVariantConst : public detail::VariantTag,
                          public detail::VariantOperators<JsonVariantConst> {
   friend class detail::VariantAttorney;
@@ -34,60 +31,44 @@ class JsonVariantConst : public detail::VariantTag,
                       JsonVariantConst>;
 
  public:
-  // Creates an unbound reference.
   JsonVariantConst() : data_(nullptr), resources_(nullptr) {}
 
-  // INTERNAL USE ONLY
   explicit JsonVariantConst(const detail::VariantData* data,
                             const detail::ResourceManager* resources)
       : data_(data), resources_(resources) {}
 
-  // Returns true if the value is null or the reference is unbound.
-  // https://arduinojson.org/v7/api/jsonvariantconst/isnull/
   bool isNull() const {
     return detail::VariantData::isNull(data_);
   }
 
-  // Returns true if the reference is unbound.
   bool isUnbound() const {
     return !data_;
   }
 
-  // Returns the depth (nesting level) of the value.
-  // https://arduinojson.org/v7/api/jsonvariantconst/nesting/
   size_t nesting() const {
     return detail::VariantData::nesting(data_, resources_);
   }
 
-  // Returns the size of the array or object.
-  // https://arduinojson.org/v7/api/jsonvariantconst/size/
   size_t size() const {
     return detail::VariantData::size(data_, resources_);
   }
 
-  // Casts the value to the specified type.
-  // https://arduinojson.org/v7/api/jsonvariantconst/as/
   template <typename T,
             detail::enable_if_t<ConversionSupported<T>::value, int> = 0>
   T as() const {
     return Converter<T>::fromJson(*this);
   }
 
-  // Invalid conversion. Will not compile.
   template <typename T,
             detail::enable_if_t<!ConversionSupported<T>::value, int> = 0>
   detail::InvalidConversion<JsonVariantConst, T> as() const;
 
-  // Returns true if the value is of the specified type.
-  // https://arduinojson.org/v7/api/jsonvariantconst/is/
   template <typename T,
             detail::enable_if_t<ConversionSupported<T>::value, int> = 0>
   bool is() const {
     return Converter<T>::checkJson(*this);
   }
 
-  // Always returns false for the unsupported types.
-  // https://arduinojson.org/v7/api/jsonvariantconst/is/
   template <typename T,
             detail::enable_if_t<!ConversionSupported<T>::value, int> = 0>
   bool is() const {
@@ -99,8 +80,6 @@ class JsonVariantConst : public detail::VariantTag,
     return as<T>();
   }
 
-  // Gets array's element at specified index.
-  // https://arduinojson.org/v7/api/jsonvariantconst/subscript/
   template <typename T,
             detail::enable_if_t<detail::is_integral<T>::value, int> = 0>
   JsonVariantConst operator[](T index) const {
@@ -109,8 +88,6 @@ class JsonVariantConst : public detail::VariantTag,
         resources_);
   }
 
-  // Gets object's member with specified key.
-  // https://arduinojson.org/v7/api/jsonvariantconst/subscript/
   template <typename TString,
             detail::enable_if_t<detail::IsString<TString>::value, int> = 0>
   JsonVariantConst operator[](const TString& key) const {
@@ -119,8 +96,6 @@ class JsonVariantConst : public detail::VariantTag,
                             resources_);
   }
 
-  // Gets object's member with specified key.
-  // https://arduinojson.org/v7/api/jsonvariantconst/subscript/
   template <typename TChar,
             detail::enable_if_t<detail::IsString<TChar*>::value &&
                                     !detail::is_const<TChar>::value,
@@ -131,9 +106,6 @@ class JsonVariantConst : public detail::VariantTag,
                             resources_);
   }
 
-  // Gets object's member with specified key or the array's element at the
-  // specified index.
-  // https://arduinojson.org/v7/api/jsonvariantconst/subscript/
   template <typename TVariant,
             detail::enable_if_t<detail::IsVariant<TVariant>::value, int> = 0>
   JsonVariantConst operator[](const TVariant& key) const {
@@ -143,8 +115,6 @@ class JsonVariantConst : public detail::VariantTag,
       return operator[](key.template as<JsonString>());
   }
 
-  // DEPRECATED: use obj[key].is<T>() instead
-  // https://arduinojson.org/v7/api/jsonvariantconst/containskey/
   template <typename TString,
             detail::enable_if_t<detail::IsString<TString>::value, int> = 0>
   ARDUINOJSON_DEPRECATED("use var[key].is<T>() instead")
@@ -153,8 +123,6 @@ class JsonVariantConst : public detail::VariantTag,
                                           resources_) != 0;
   }
 
-  // DEPRECATED: use obj["key"].is<T>() instead
-  // https://arduinojson.org/v7/api/jsonvariantconst/containskey/
   template <typename TChar,
             detail::enable_if_t<detail::IsString<TChar*>::value &&
                                     !detail::is_const<TChar>::value,
@@ -165,8 +133,6 @@ class JsonVariantConst : public detail::VariantTag,
                                           resources_) != 0;
   }
 
-  // DEPRECATED: use obj[key].is<T>() instead
-  // https://arduinojson.org/v7/api/jsonvariantconst/containskey/
   template <typename TVariant,
             detail::enable_if_t<detail::IsVariant<TVariant>::value, int> = 0>
   ARDUINOJSON_DEPRECATED("use var[key].is<T>() instead")
@@ -174,7 +140,6 @@ class JsonVariantConst : public detail::VariantTag,
     return containsKey(key.template as<const char*>());
   }
 
-  // DEPRECATED: always returns zero
   ARDUINOJSON_DEPRECATED("always returns zero")
   size_t memoryUsage() const {
     return 0;

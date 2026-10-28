@@ -12,7 +12,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// clang-format off
 template <typename T>
 struct is_integral : integral_constant<bool,
     is_same<remove_cv_t<T>, signed char>::value ||
@@ -27,6 +26,5 @@ struct is_integral : integral_constant<bool,
     is_same<remove_cv_t<T>, unsigned long long>::value ||
     is_same<remove_cv_t<T>, char>::value ||
     is_same<remove_cv_t<T>, bool>::value> {};
-// clang-format on
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

@@ -19,17 +19,12 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename T>
 CompareResult compare(JsonVariantConst lhs,
-                      const T& rhs);  // VariantCompare.cpp
+                      const T& rhs);
 
 struct VariantOperatorTag {};
 
 template <typename TVariant>
 struct VariantOperators : VariantOperatorTag {
-  // Returns the default value if the JsonVariant is unbound or incompatible
-  //
-  // int operator|(JsonVariant, int)
-  // float operator|(JsonVariant, float)
-  // bool operator|(JsonVariant, bool)
   template <typename T,
             enable_if_t<!IsVariant<T>::value && !is_array<T>::value, int> = 0>
   friend T operator|(const TVariant& variant, const T& defaultValue) {
@@ -38,8 +33,6 @@ struct VariantOperators : VariantOperatorTag {
     else
       return defaultValue;
   }
-  //
-  // const char* operator|(JsonVariant, const char*)
   friend const char* operator|(const TVariant& variant,
                                const char* defaultValue) {
     if (variant.template is<const char*>())
@@ -47,8 +40,6 @@ struct VariantOperators : VariantOperatorTag {
     else
       return defaultValue;
   }
-  //
-  // JsonVariant operator|(JsonVariant, JsonVariant)
   template <typename T>
   friend enable_if_t<IsVariant<T>::value, JsonVariantConst> operator|(
       const TVariant& variant, const T& defaultValue) {
@@ -58,7 +49,6 @@ struct VariantOperators : VariantOperatorTag {
       return defaultValue;
   }
 
-  // value == TVariant
   template <typename T>
   friend bool operator==(T* lhs, const TVariant& rhs) {
     return compare(rhs, lhs) == COMPARE_RESULT_EQUAL;
@@ -68,7 +58,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(rhs, lhs) == COMPARE_RESULT_EQUAL;
   }
 
-  // TVariant == value
   template <typename T>
   friend bool operator==(const TVariant& lhs, T* rhs) {
     return compare(lhs, rhs) == COMPARE_RESULT_EQUAL;
@@ -79,7 +68,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(lhs, rhs) == COMPARE_RESULT_EQUAL;
   }
 
-  // value != TVariant
   template <typename T>
   friend bool operator!=(T* lhs, const TVariant& rhs) {
     return compare(rhs, lhs) != COMPARE_RESULT_EQUAL;
@@ -89,7 +77,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(rhs, lhs) != COMPARE_RESULT_EQUAL;
   }
 
-  // TVariant != value
   template <typename T>
   friend bool operator!=(const TVariant& lhs, T* rhs) {
     return compare(lhs, rhs) != COMPARE_RESULT_EQUAL;
@@ -100,7 +87,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(lhs, rhs) != COMPARE_RESULT_EQUAL;
   }
 
-  // value < TVariant
   template <typename T>
   friend bool operator<(T* lhs, const TVariant& rhs) {
     return compare(rhs, lhs) == COMPARE_RESULT_GREATER;
@@ -110,7 +96,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(rhs, lhs) == COMPARE_RESULT_GREATER;
   }
 
-  // TVariant < value
   template <typename T>
   friend bool operator<(const TVariant& lhs, T* rhs) {
     return compare(lhs, rhs) == COMPARE_RESULT_LESS;
@@ -121,7 +106,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(lhs, rhs) == COMPARE_RESULT_LESS;
   }
 
-  // value <= TVariant
   template <typename T>
   friend bool operator<=(T* lhs, const TVariant& rhs) {
     return (compare(rhs, lhs) & COMPARE_RESULT_GREATER_OR_EQUAL) != 0;
@@ -131,7 +115,6 @@ struct VariantOperators : VariantOperatorTag {
     return (compare(rhs, lhs) & COMPARE_RESULT_GREATER_OR_EQUAL) != 0;
   }
 
-  // TVariant <= value
   template <typename T>
   friend bool operator<=(const TVariant& lhs, T* rhs) {
     return (compare(lhs, rhs) & COMPARE_RESULT_LESS_OR_EQUAL) != 0;
@@ -142,7 +125,6 @@ struct VariantOperators : VariantOperatorTag {
     return (compare(lhs, rhs) & COMPARE_RESULT_LESS_OR_EQUAL) != 0;
   }
 
-  // value > TVariant
   template <typename T>
   friend bool operator>(T* lhs, const TVariant& rhs) {
     return compare(rhs, lhs) == COMPARE_RESULT_LESS;
@@ -152,7 +134,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(rhs, lhs) == COMPARE_RESULT_LESS;
   }
 
-  // TVariant > value
   template <typename T>
   friend bool operator>(const TVariant& lhs, T* rhs) {
     return compare(lhs, rhs) == COMPARE_RESULT_GREATER;
@@ -163,7 +144,6 @@ struct VariantOperators : VariantOperatorTag {
     return compare(lhs, rhs) == COMPARE_RESULT_GREATER;
   }
 
-  // value >= TVariant
   template <typename T>
   friend bool operator>=(T* lhs, const TVariant& rhs) {
     return (compare(rhs, lhs) & COMPARE_RESULT_LESS_OR_EQUAL) != 0;
@@ -173,7 +153,6 @@ struct VariantOperators : VariantOperatorTag {
     return (compare(rhs, lhs) & COMPARE_RESULT_LESS_OR_EQUAL) != 0;
   }
 
-  // TVariant >= value
   template <typename T>
   friend bool operator>=(const TVariant& lhs, T* rhs) {
     return (compare(lhs, rhs) & COMPARE_RESULT_GREATER_OR_EQUAL) != 0;

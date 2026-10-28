@@ -34,11 +34,11 @@ static void checkVariant(T value, const std::string& expected) {
 
 TEST_CASE("serialize MsgPack value") {
   SECTION("unbound") {
-    checkVariant(JsonVariant(), "\xC0");  // we represent undefined as nil
+    checkVariant(JsonVariant(), "\xC0");
   }
 
   SECTION("nil") {
-    const char* nil = 0;  // ArduinoJson uses a string for null
+    const char* nil = 0;
     checkVariant(nil, "\xC0");
   }
 
@@ -139,7 +139,7 @@ TEST_CASE("serialize MsgPack value") {
 
   SECTION("str 32") {
     std::string shortest(65536, '?');
-    checkVariant(JsonString(shortest.c_str(), true),  // force store by pointer
+    checkVariant(JsonString(shortest.c_str(), true),
                  "\xDB\x00\x01\x00\x00"_s + shortest);
   }
 
@@ -156,8 +156,6 @@ TEST_CASE("serialize MsgPack value") {
     auto str = std::string(256, '?');
     checkVariant(MsgPackBinary(str.data(), str.size()), "\xC5\x01\x00"_s + str);
   }
-
-  // bin 32 is tested in string_length_size_4.cpp
 
   SECTION("fixext 1") {
     checkVariant(MsgPackExtension(1, "\x02", 1), "\xD4\x01\x02");
@@ -198,7 +196,7 @@ TEST_CASE("serialize MsgPack value") {
                  "\xC8\x01\x00\x02"_s + str);
   }
 
-  SECTION("serialize round double as integer") {  // Issue #1718
+  SECTION("serialize round double as integer") {
     checkVariant(-32768.0, "\xD1\x80\x00");
     checkVariant(-129.0, "\xD1\xFF\x7F");
     checkVariant(-128.0, "\xD0\x80");

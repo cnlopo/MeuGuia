@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that return the type T without the const modifier
 template <typename T>
 struct is_const : false_type {};
 

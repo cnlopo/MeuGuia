@@ -24,83 +24,51 @@
 #include <SPI.h>
 
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-IPAddress remoteIp(192, 168, 0, 108);  // <- EDIT!!!!
+IPAddress remoteIp(192, 168, 0, 108);
 unsigned short remotePort = 8888;
 unsigned short localPort = 8888;
 EthernetUDP udp;
 
 void setup() {
-  // Initialize serial port
   Serial.begin(9600);
   while (!Serial)
     continue;
 
-  // Initialize Ethernet libary
   if (!Ethernet.begin(mac)) {
     Serial.println(F("Failed to initialize Ethernet library"));
     return;
   }
 
-  // Enable UDP
   udp.begin(localPort);
 }
 
 void loop() {
-  // Allocate a temporary JsonDocument
   JsonDocument doc;
 
-  // Create the "analog" array
   JsonArray analogValues = doc["analog"].to<JsonArray>();
   for (int pin = 0; pin < 6; pin++) {
-    // Read the analog input
     int value = analogRead(pin);
 
-    // Add the value at the end of the array
     analogValues.add(value);
   }
 
-  // Create the "digital" array
   JsonArray digitalValues = doc["digital"].to<JsonArray>();
   for (int pin = 0; pin < 14; pin++) {
-    // Read the digital input
     int value = digitalRead(pin);
 
-    // Add the value at the end of the array
     digitalValues.add(value);
   }
 
-  // Log
   Serial.print(F("Sending to "));
   Serial.print(remoteIp);
   Serial.print(F(" on port "));
   Serial.println(remotePort);
   serializeJson(doc, Serial);
 
-  // Send UDP packet
   udp.beginPacket(remoteIp, remotePort);
   serializeJson(doc, udp);
   udp.println();
   udp.endPacket();
 
-  // Wait
   delay(10000);
 }
-
-// Performance issue?
-// ------------------
-//
-// EthernetUDP is an unbuffered stream, which is not optimal for ArduinoJson.
-// See: https://arduinojson.org/v7/how-to/improve-speed/
-
-// See also
-// --------
-//
-// https://arduinojson.org/ contains the documentation for all the functions
-// used above. It also includes an FAQ that will help you solve any
-// serialization problem.
-//
-// The book "Mastering ArduinoJson" contains a tutorial on serialization.
-// It begins with a simple example, then adds more features like serializing
-// directly to a file or any stream.
-// Learn more at https://arduinojson.org/book/
-// Use the coupon code TWENTY for a 20% discount ❤❤❤❤❤

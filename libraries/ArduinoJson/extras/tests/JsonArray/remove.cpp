@@ -96,8 +96,8 @@ TEST_CASE("JsonArray::remove()") {
   }
 
   SECTION("use JsonVariant as index") {
-    array.remove(array[3]);  // no effect with null variant
-    array.remove(array[0]);  // remove element at index 1
+    array.remove(array[3]);
+    array.remove(array[0]);
 
     REQUIRE(2 == array.size());
     REQUIRE(array[0] == 1);
@@ -110,17 +110,14 @@ TEST_CASE("Removed elements are recycled") {
   JsonDocument doc(&spy);
   JsonArray array = doc.to<JsonArray>();
 
-  // fill the pool entirely
   for (int i = 0; i < ARDUINOJSON_POOL_CAPACITY; i++)
     array.add(i);
 
-  // free one slot in the pool
   array.remove(0);
 
-  // add one element; it should use the free slot
   array.add(42);
 
   REQUIRE(spy.log() == AllocatorLog{
-                           Allocate(sizeofPool()),  // only one pool
+                           Allocate(sizeofPool()),
                        });
 }

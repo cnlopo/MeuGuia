@@ -127,8 +127,6 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// Produces a minified JSON document.
-// https://arduinojson.org/v7/api/json/serializejson/
 template <
     typename TDestination,
     detail::enable_if_t<!detail::is_pointer<TDestination>::value, int> = 0>
@@ -137,16 +135,12 @@ size_t serializeJson(JsonVariantConst source, TDestination& destination) {
   return serialize<JsonSerializer>(source, destination);
 }
 
-// Produces a minified JSON document.
-// https://arduinojson.org/v7/api/json/serializejson/
 inline size_t serializeJson(JsonVariantConst source, void* buffer,
                             size_t bufferSize) {
   using namespace detail;
   return serialize<JsonSerializer>(source, buffer, bufferSize);
 }
 
-// Computes the length of the document that serializeJson() produces.
-// https://arduinojson.org/v7/api/json/measurejson/
 inline size_t measureJson(JsonVariantConst source) {
   using namespace detail;
   return measure<JsonSerializer>(source);

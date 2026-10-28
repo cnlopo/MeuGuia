@@ -26,19 +26,15 @@ struct Converter {
                 "char' or another integer type instead");
 
   static void toJson(const T& src, JsonVariant dst) {
-    // clang-format off
-    convertToJson(src, dst); // Error here? See https://arduinojson.org/v7/unsupported-set/
-    // clang-format on
+    convertToJson(src, dst);
   }
 
   static detail::decay_t<T> fromJson(JsonVariantConst src) {
     static_assert(!detail::is_same<T, char*>::value,
                   "type 'char*' is not supported, use 'const char*' instead");
 
-    // clang-format off
-    T result; // Error here? See https://arduinojson.org/v7/non-default-constructible/
-    convertFromJson(src, result);  // Error here? See https://arduinojson.org/v7/unsupported-as/
-    // clang-format on
+    T result;
+    convertFromJson(src, result);
     return result;
   }
 
@@ -47,9 +43,7 @@ struct Converter {
                   "type 'char*' is not supported, use 'const char*' instead");
 
     T dummy = T();
-    // clang-format off
-    return canConvertFromJson(src, dummy);  // Error here? See https://arduinojson.org/v7/unsupported-is/
-    // clang-format on
+    return canConvertFromJson(src, dummy);
   }
 };
 
@@ -196,9 +190,6 @@ inline detail::enable_if_t<detail::IsString<T>::value> convertToJson(
   detail::VariantData::setString(data, adaptString(src), resources);
 }
 
-// SerializedValue<std::string>
-// SerializedValue<String>
-// SerializedValue<const __FlashStringHelper*>
 template <typename T>
 struct Converter<SerializedValue<T>> : private detail::VariantAttorney {
   static void toJson(SerializedValue<T> src, JsonVariant dst) {
@@ -256,7 +247,7 @@ class StringBuilderPrint : public Print {
  private:
   StringBuilder copier_;
 };
-}  // namespace detail
+}
 
 inline void convertToJson(const ::Printable& src, JsonVariant dst) {
   auto resources = detail::VariantAttorney::getResourceManager(dst);
@@ -309,7 +300,7 @@ inline bool canConvertFromJson(JsonVariantConst src, const std::string&) {
 
 inline void convertFromJson(JsonVariantConst src, std::string_view& dst) {
   JsonString str = src.as<JsonString>();
-  if (str)  // the standard doesn't allow passing null to the constructor
+  if (str)
     dst = std::string_view(str.c_str(), str.size());
 }
 

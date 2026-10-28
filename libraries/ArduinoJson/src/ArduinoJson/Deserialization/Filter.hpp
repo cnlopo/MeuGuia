@@ -38,7 +38,7 @@ class Filter {
 
   template <typename TKey>
   Filter operator[](const TKey& key) const {
-    if (variant_ == true)  // "true" means "allow recursively"
+    if (variant_ == true)
       return *this;
     JsonVariantConst member = variant_[key];
     return Filter(member.isNull() ? variant_["*"] : member);
@@ -47,7 +47,7 @@ class Filter {
  private:
   JsonVariantConst variant_;
 };
-}  // namespace DeserializationOption
+}
 
 namespace detail {
 struct AllowAllFilter {
@@ -72,6 +72,6 @@ struct AllowAllFilter {
     return AllowAllFilter();
   }
 };
-}  // namespace detail
+}
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

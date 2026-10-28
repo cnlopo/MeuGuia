@@ -8,8 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A proxy class to get or set a member of an object.
-// https://arduinojson.org/v7/api/jsonobject/subscript/
 template <typename TUpstream, typename AdaptedString>
 class MemberProxy
     : public VariantRefBase<MemberProxy<TUpstream, AdaptedString>>,
@@ -46,10 +44,8 @@ class MemberProxy
   }
 
  private:
-  // clang-format off
-  MemberProxy(const MemberProxy& src) // Error here? See https://arduinojson.org/v7/proxy-non-copyable/
+  MemberProxy(const MemberProxy& src)
       : upstream_(src.upstream_), key_(src.key_) {}
-  // clang-format on
 
   ResourceManager* getResourceManager() const {
     return VariantAttorney::getResourceManager(upstream_);

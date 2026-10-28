@@ -6,7 +6,6 @@
 
 #include <string>
 
-// Reproduces Arduino's String class
 class String {
  public:
   String() = default;
@@ -55,7 +54,6 @@ class String {
   }
 
  protected:
-  // This function is protected in most Arduino cores
   unsigned char concat(const char* s, size_t n) {
     if (str_.size() + n > maxCapacity_)
       return 0;

@@ -58,7 +58,7 @@ class StringPool {
       return nullptr;
 
     stringGetChars(str, node->data, n);
-    node->data[n] = 0;  // force NUL terminator
+    node->data[n] = 0;
     add(node);
     return node;
   }

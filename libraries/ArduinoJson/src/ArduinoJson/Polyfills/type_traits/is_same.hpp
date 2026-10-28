@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that returns true if types T and U are the same.
 template <typename T, typename U>
 struct is_same : false_type {};
 

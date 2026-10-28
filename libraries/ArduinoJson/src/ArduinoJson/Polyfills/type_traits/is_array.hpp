@@ -6,7 +6,7 @@
 
 #include <ArduinoJson/Namespace.hpp>
 
-#include <stddef.h>  // size_t
+#include <stddef.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 

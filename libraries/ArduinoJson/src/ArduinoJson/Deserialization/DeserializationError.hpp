@@ -28,7 +28,6 @@ class DeserializationError {
   DeserializationError() {}
   DeserializationError(Code c) : code_(c) {}
 
-  // Compare with DeserializationError
   friend bool operator==(const DeserializationError& lhs,
                          const DeserializationError& rhs) {
     return lhs.code_ == rhs.code_;
@@ -38,7 +37,6 @@ class DeserializationError {
     return lhs.code_ != rhs.code_;
   }
 
-  // Compare with Code
   friend bool operator==(const DeserializationError& lhs, Code rhs) {
     return lhs.code_ == rhs;
   }
@@ -52,12 +50,10 @@ class DeserializationError {
     return lhs != rhs.code_;
   }
 
-  // Returns true if there is an error
   explicit operator bool() const {
     return code_ != Ok;
   }
 
-  // Returns internal enum, useful for switch statement
   Code code() const {
     return code_;
   }

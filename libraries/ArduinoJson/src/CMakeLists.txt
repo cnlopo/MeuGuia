@@ -9,8 +9,6 @@ add_library(ArduinoJson INTERFACE)
 
 include(GNUInstallDirs)
 
-# Adding the install interface generator expression makes sure that the include
-# files are installed to the proper location (provided by GNUInstallDirs)
 target_include_directories(ArduinoJson
 	INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -22,7 +20,6 @@ target_compile_definitions(ArduinoJson
 		ARDUINOJSON_DEBUG=$<CONFIG:Debug>
 )
 
-# locations are provided by GNUInstallDirs
 install(
 	TARGETS
 		ArduinoJson

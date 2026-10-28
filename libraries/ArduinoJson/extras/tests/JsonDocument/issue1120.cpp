@@ -21,7 +21,7 @@ TEST_CASE("Issue #1120") {
   }
 
   SECTION("ElementProxy<MemberProxy<const char*> >::isNull()") {
-    SECTION("returns false") {  // Issue #1120
+    SECTION("returns false") {
       CHECK(doc["contents"][1].isNull() == false);
     }
 

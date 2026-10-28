@@ -27,6 +27,6 @@ class NestingLimit {
  private:
   uint8_t value_;
 };
-}  // namespace DeserializationOption
+}
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

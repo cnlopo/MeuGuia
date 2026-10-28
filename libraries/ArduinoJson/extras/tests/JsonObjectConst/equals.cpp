@@ -38,7 +38,6 @@ TEST_CASE("JsonObjectConst::operator==()") {
   SECTION("should return true when objs equal") {
     doc1["hello"] = "world";
     doc1["anwser"] = 42;
-    // insert in different order
     doc2["anwser"] = 42;
     doc2["hello"] = "world";
 

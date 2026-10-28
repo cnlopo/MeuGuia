@@ -5,7 +5,7 @@
 
 namespace my {
 using ArduinoJson::detail::isinf;
-}  // namespace my
+}
 
 void checkFloat(const char* input, float expected) {
   using ArduinoJson::detail::NumberType;

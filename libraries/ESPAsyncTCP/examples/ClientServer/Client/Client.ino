@@ -13,7 +13,6 @@ static os_timer_t intervalTimer;
 static void replyToServer(void* arg) {
 	AsyncClient* client = reinterpret_cast<AsyncClient*>(arg);
 
-	// send reply
 	if (client->space() > 32 && client->canSend()) {
 		char message[32];
 		sprintf(message, "this is from %s", WiFi.localIP().toString().c_str());
@@ -22,12 +21,11 @@ static void replyToServer(void* arg) {
 	}
 }
 
-/* event callbacks */
 static void handleData(void* arg, AsyncClient* client, void *data, size_t len) {
 	Serial.printf("\n data received from %s \n", client->remoteIP().toString().c_str());
 	Serial.write((uint8_t*)data, len);
 
-	os_timer_arm(&intervalTimer, 2000, true); // schedule for reply to server at next 2s
+	os_timer_arm(&intervalTimer, 2000, true);
 }
 
 void onConnect(void* arg, AsyncClient* client) {
@@ -40,7 +38,6 @@ void setup() {
 	Serial.begin(115200);
 	delay(20);
 
-	// connects to access point
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(SSID, PASSWORD);
 	while (WiFi.status() != WL_CONNECTED) {

@@ -105,7 +105,7 @@ class AllocatorLog {
     auto s = log_.str();
     if (s.empty())
       return "(empty)";
-    s.pop_back();  // remove the trailing '\n'
+    s.pop_back();
     return s;
   }
 
@@ -187,8 +187,6 @@ class SpyingAllocator : public ArduinoJson::Allocator {
       if (!p)
         return nullptr;
       return reinterpret_cast<AllocatedBlock*>(
-          // Cast to void* to silence "cast increases required alignment of
-          // target type [-Werror=cast-align]"
           reinterpret_cast<void*>(reinterpret_cast<char*>(p) -
                                   offsetof(AllocatedBlock, payload)));
     }
@@ -218,7 +216,6 @@ class KillswitchAllocator : public ArduinoJson::Allocator {
     return working_ ? upstream_->reallocate(ptr, n) : 0;
   }
 
-  // Turn the killswitch on, so all allocation fail
   void on() {
     working_ = false;
   }
@@ -262,7 +259,7 @@ class TimebombAllocator : public ArduinoJson::Allocator {
   size_t countdown_ = 0;
   Allocator* upstream_;
 };
-}  // namespace
+}
 
 inline size_t sizeofPoolList(size_t n = ARDUINOJSON_INITIAL_POOL_COUNT) {
   using namespace ArduinoJson::detail;
@@ -276,7 +273,6 @@ inline size_t sizeofPool(
 }
 
 inline size_t sizeofStringBuffer(size_t iteration = 1) {
-  // returns 31, 63, 127, 255, etc.
   auto capacity = ArduinoJson::detail::StringBuilder::initialCapacity;
   for (size_t i = 1; i < iteration; i++)
     capacity = capacity * 2 + 1;

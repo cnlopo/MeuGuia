@@ -35,7 +35,6 @@ class JsonDeserializer {
     err = parseVariant(variant, filter, nestingLimit);
 
     if (!err && latch_.last() != 0 && variant.isFloat()) {
-      // We don't detect trailing characters earlier, so we need to check now
       return DeserializationError::InvalidInput;
     }
 
@@ -99,8 +98,6 @@ class JsonDeserializer {
         return skipKeyword("false");
 
       case 'n':
-        // the variant should already by null, except if the same object key was
-        // used twice, as in {"a":1,"a":null}
         return skipKeyword("null");
 
       default:
@@ -153,30 +150,24 @@ class JsonDeserializer {
     if (nestingLimit.reached())
       return DeserializationError::TooDeep;
 
-    // Skip opening braket
     ARDUINOJSON_ASSERT(current() == '[');
     move();
 
-    // Skip spaces
     err = skipSpacesAndComments();
     if (err)
       return err;
 
-    // Empty array?
     if (eat(']'))
       return DeserializationError::Ok;
 
     TFilter elementFilter = filter[0UL];
 
-    // Read each value
     for (;;) {
       if (elementFilter.allow()) {
-        // Allocate slot in array
         VariantData* value = array.addElement(resources_);
         if (!value)
           return DeserializationError::NoMemory;
 
-        // 1 - Parse value
         err = parseVariant(*value, elementFilter, nestingLimit.decrement());
         if (err)
           return err;
@@ -186,12 +177,10 @@ class JsonDeserializer {
           return err;
       }
 
-      // 2 - Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // 3 - More values?
       if (eat(']'))
         return DeserializationError::Ok;
       if (!eat(','))
@@ -206,23 +195,18 @@ class JsonDeserializer {
     if (nestingLimit.reached())
       return DeserializationError::TooDeep;
 
-    // Skip opening braket
     ARDUINOJSON_ASSERT(current() == '[');
     move();
 
-    // Read each value
     for (;;) {
-      // 1 - Skip value
       err = skipVariant(nestingLimit.decrement());
       if (err)
         return err;
 
-      // 2 - Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // 3 - More values?
       if (eat(']'))
         return DeserializationError::Ok;
       if (!eat(','))
@@ -239,32 +223,25 @@ class JsonDeserializer {
     if (nestingLimit.reached())
       return DeserializationError::TooDeep;
 
-    // Skip opening brace
     ARDUINOJSON_ASSERT(current() == '{');
     move();
 
-    // Skip spaces
     err = skipSpacesAndComments();
     if (err)
       return err;
 
-    // Empty object?
     if (eat('}'))
       return DeserializationError::Ok;
 
-    // Read each key value pair
     for (;;) {
-      // Parse key
       err = parseKey();
       if (err)
         return err;
 
-      // Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // Colon
       if (!eat(':'))
         return DeserializationError::InvalidInput;
 
@@ -284,7 +261,6 @@ class JsonDeserializer {
           member->clear(resources_);
         }
 
-        // Parse value
         err = parseVariant(*member, memberFilter, nestingLimit.decrement());
         if (err)
           return err;
@@ -294,18 +270,15 @@ class JsonDeserializer {
           return err;
       }
 
-      // Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // More keys/values?
       if (eat('}'))
         return DeserializationError::Ok;
       if (!eat(','))
         return DeserializationError::InvalidInput;
 
-      // Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
@@ -319,46 +292,36 @@ class JsonDeserializer {
     if (nestingLimit.reached())
       return DeserializationError::TooDeep;
 
-    // Skip opening brace
     ARDUINOJSON_ASSERT(current() == '{');
     move();
 
-    // Skip spaces
     err = skipSpacesAndComments();
     if (err)
       return err;
 
-    // Empty object?
     if (eat('}'))
       return DeserializationError::Ok;
 
-    // Read each key value pair
     for (;;) {
-      // Skip key
       err = skipKey();
       if (err)
         return err;
 
-      // Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // Colon
       if (!eat(':'))
         return DeserializationError::InvalidInput;
 
-      // Skip value
       err = skipVariant(nestingLimit.decrement());
       if (err)
         return err;
 
-      // Skip spaces
       err = skipSpacesAndComments();
       if (err)
         return err;
 
-      // More keys/values?
       if (eat('}'))
         return DeserializationError::Ok;
       if (!eat(','))
@@ -431,7 +394,6 @@ class JsonDeserializer {
           continue;
         }
 
-        // replace char
         c = EscapeSequence::unescapeChar(c);
         if (c == '\0')
           return DeserializationError::InvalidInput;
@@ -451,7 +413,7 @@ class JsonDeserializer {
     char c = current();
     ARDUINOJSON_ASSERT(c);
 
-    if (canBeInNonQuotedString(c)) {  // no quotes
+    if (canBeInNonQuotedString(c)) {
       do {
         move();
         stringBuilder_.append(c);
@@ -597,19 +559,17 @@ class JsonDeserializer {
   static inline uint8_t decodeHex(char c) {
     if (c < 'A')
       return uint8_t(c - '0');
-    c = char(c & ~0x20);  // uppercase
+    c = char(c & ~0x20);
     return uint8_t(c - 'A' + 10);
   }
 
   DeserializationError::Code skipSpacesAndComments() {
     for (;;) {
       switch (current()) {
-        // end of string
         case '\0':
           return foundSomething_ ? DeserializationError::IncompleteInput
                                  : DeserializationError::EmptyInput;
 
-        // spaces
         case ' ':
         case '\t':
         case '\r':
@@ -618,13 +578,11 @@ class JsonDeserializer {
           continue;
 
 #if ARDUINOJSON_ENABLE_COMMENTS
-        // comments
         case '/':
-          move();  // skip '/'
+          move();
           switch (current()) {
-            // block comment
             case '*': {
-              move();  // skip '*'
+              move();
               bool wasStar = false;
               for (;;) {
                 char c = current();
@@ -640,9 +598,7 @@ class JsonDeserializer {
               break;
             }
 
-            // trailing comment
             case '/':
-              // no need to skip "//"
               for (;;) {
                 move();
                 char c = current();
@@ -653,7 +609,6 @@ class JsonDeserializer {
               }
               break;
 
-            // not a comment, just a '/'
             default:
               return DeserializationError::InvalidInput;
           }
@@ -684,17 +639,13 @@ class JsonDeserializer {
   bool foundSomething_;
   Latch<TReader> latch_;
   ResourceManager* resources_;
-  char buffer_[64];  // using a member instead of a local variable because it
-                     // ended in the recursive path after compiler inlined the
-                     // code
+  char buffer_[64];
 };
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// Parses a JSON input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v7/api/json/deserializejson/
 template <typename TDestination, typename... Args,
           detail::enable_if_t<
               detail::is_deserialize_destination<TDestination>::value, int> = 0>
@@ -705,8 +656,6 @@ inline DeserializationError deserializeJson(TDestination&& dst,
                                        detail::forward<Args>(args)...);
 }
 
-// Parses a JSON input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v7/api/json/deserializejson/
 template <typename TDestination, typename TChar, typename... Args,
           detail::enable_if_t<
               detail::is_deserialize_destination<TDestination>::value, int> = 0>

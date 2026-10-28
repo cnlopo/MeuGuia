@@ -199,4 +199,4 @@ public:
 
 
 
-#endif /* STRINGARRAY_H_ */
+#endif

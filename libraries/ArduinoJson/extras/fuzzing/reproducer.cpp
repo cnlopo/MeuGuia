@@ -5,9 +5,9 @@
 // This file is NOT use by Google's OSS fuzz
 // I only use it to reproduce the bugs found
 
-#include <stdint.h>  // size_t
-#include <stdio.h>   // fopen et al.
-#include <stdlib.h>  // exit
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <vector>
 

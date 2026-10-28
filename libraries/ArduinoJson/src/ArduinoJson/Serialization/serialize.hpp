@@ -35,7 +35,6 @@ enable_if_t<TSerializer<StaticStringWriter>::producesText, size_t> serialize(
     ArduinoJson::JsonVariantConst source, void* buffer, size_t bufferSize) {
   StaticStringWriter writer(reinterpret_cast<char*>(buffer), bufferSize);
   size_t n = doSerialize<TSerializer>(source, writer);
-  // add null-terminator for text output (not counted in the size)
   if (n < bufferSize)
     reinterpret_cast<char*>(buffer)[n] = 0;
   return n;

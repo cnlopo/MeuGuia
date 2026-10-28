@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <stddef.h>  // size_t
-#include <string.h>  // strcmp
+#include <stddef.h>
+#include <string.h>
 
 #include <ArduinoJson/Polyfills/assert.hpp>
 #include <ArduinoJson/Polyfills/attributes.hpp>
@@ -57,7 +57,6 @@ class RamString {
   const char* str_;
 
 #if ARDUINOJSON_SIZEOF_POINTER <= 2
-  // Use a bitfield only on 8-bit microcontrollers
   size_t size_ : sizeof(size_t) * 8 - 1;
   bool static_ : 1;
 #else

@@ -58,7 +58,7 @@ class AsyncStaticWebHandler: public AsyncWebHandler {
     AsyncStaticWebHandler& setLastModified(struct tm* last_modified);
   #ifdef ESP8266
     AsyncStaticWebHandler& setLastModified(time_t last_modified);
-    AsyncStaticWebHandler& setLastModified(); //sets to current time. Make sure sntp is runing and time is updated
+    AsyncStaticWebHandler& setLastModified();
   #endif
     AsyncStaticWebHandler& setTemplateProcessor(AwsTemplateProcessor newCallback) {_callback = newCallback; return *this;}
 };
@@ -97,7 +97,7 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
         std::smatch matches;
         std::string s(request->url().c_str());
         if(std::regex_search(s, matches, pattern)) {
-          for (size_t i = 1; i < matches.size(); ++i) { // start from 1
+          for (size_t i = 1; i < matches.size(); ++i) {
             request->_addPathParam(matches[i].str().c_str());
           }
         } else {
@@ -148,4 +148,4 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
     virtual bool isRequestHandlerTrivial() override final {return _onRequest ? false : true;}
 };
 
-#endif /* ASYNCWEBSERVERHANDLERIMPL_H_ */
+#endif

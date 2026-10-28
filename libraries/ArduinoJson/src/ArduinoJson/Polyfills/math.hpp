@@ -8,9 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// Some libraries #define isnan() and isinf() so we need to check before
-// using this name
-
 #ifndef isnan
 template <typename T>
 bool isnan(T x) {

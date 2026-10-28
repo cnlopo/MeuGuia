@@ -30,13 +30,13 @@ TEST_CASE("Valid JSON strings value") {
       {"'\\t'", "\t"},
       {"\"1\\\"2\\\\3\\/4\\b5\\f6\\n7\\r8\\t9\"", "1\"2\\3/4\b5\f6\n7\r8\t9"},
       {"'\\u0041'", "A"},
-      {"'\\u00e4'", "\xc3\xa4"},                 // ä
-      {"'\\u00E4'", "\xc3\xa4"},                 // ä
-      {"'\\u3042'", "\xe3\x81\x82"},             // あ
-      {"'\\ud83d\\udda4'", "\xf0\x9f\x96\xa4"},  // 🖤
-      {"'\\uF053'", "\xef\x81\x93"},             // issue #1173
-      {"'\\uF015'", "\xef\x80\x95"},             // issue #1173
-      {"'\\uF054'", "\xef\x81\x94"},             // issue #1173
+      {"'\\u00e4'", "\xc3\xa4"},
+      {"'\\u00E4'", "\xc3\xa4"},
+      {"'\\u3042'", "\xe3\x81\x82"},
+      {"'\\ud83d\\udda4'", "\xf0\x9f\x96\xa4"},
+      {"'\\uF053'", "\xef\x81\x93"},
+      {"'\\uF015'", "\xef\x80\x95"},
+      {"'\\uF054'", "\xef\x81\x94"},
   };
   const size_t testCount = sizeof(testCases) / sizeof(testCases[0]);
 

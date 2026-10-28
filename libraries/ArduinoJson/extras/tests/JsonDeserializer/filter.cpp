@@ -28,13 +28,13 @@ TEST_CASE("Filtering") {
 
   TestCase testCases[] = {
       {
-          "Input is object, filter is null",  // description
-          "{\"hello\":\"world\"}",            // input
-          "null",                             // filter
-          10,                                 // nestingLimit
-          DeserializationError::Ok,           // error
-          "null",                             // output
-          0,                                  // memoryUsage
+          "Input is object, filter is null",
+          "{\"hello\":\"world\"}",
+          "null",
+          10,
+          DeserializationError::Ok,
+          "null",
+          0,
       },
       {
           "Input is object, filter is false",
@@ -731,8 +731,6 @@ TEST_CASE("Overloads") {
 
   using namespace DeserializationOption;
 
-  // deserializeJson(..., Filter)
-
   SECTION("const char*, Filter") {
     deserializeJson(doc, "{}", Filter(filter));
   }
@@ -759,8 +757,6 @@ TEST_CASE("Overloads") {
   }
 #endif
 
-  // deserializeJson(..., Filter, NestingLimit)
-
   SECTION("const char*, Filter, NestingLimit") {
     deserializeJson(doc, "{}", Filter(filter), NestingLimit(5));
   }
@@ -786,8 +782,6 @@ TEST_CASE("Overloads") {
     deserializeJson(doc, vla, Filter(filter), NestingLimit(5));
   }
 #endif
-
-  // deserializeJson(..., NestingLimit, Filter)
 
   SECTION("const char*, NestingLimit, Filter") {
     deserializeJson(doc, "{}", NestingLimit(5), Filter(filter));

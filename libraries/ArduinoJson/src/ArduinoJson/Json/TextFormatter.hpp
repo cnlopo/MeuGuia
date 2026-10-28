@@ -5,7 +5,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <string.h>  // for strlen
+#include <string.h>
 
 #include <ArduinoJson/Json/EscapeSequence.hpp>
 #include <ArduinoJson/Numbers/FloatParts.hpp>
@@ -24,7 +24,6 @@ class TextFormatter {
 
   TextFormatter& operator=(const TextFormatter&) = delete;
 
-  // Returns the number of bytes sent to the TWriter implementation.
   size_t bytesWritten() const {
     return writer_.count();
   }
@@ -122,30 +121,25 @@ class TextFormatter {
     char* end = buffer + sizeof(buffer);
     char* begin = end;
 
-    // write the string in reverse order
     do {
       *--begin = char(value % 10 + '0');
       value = T(value / 10);
     } while (value);
 
-    // and dump it in the right order
     writeRaw(begin, end);
   }
 
   void writeDecimals(uint32_t value, int8_t width) {
-    // buffer should be big enough for all digits and the dot
     char buffer[16];
     char* end = buffer + sizeof(buffer);
     char* begin = end;
 
-    // write the string in reverse order
     while (width--) {
       *--begin = char(value % 10 + '0');
       value /= 10;
     }
     *--begin = '.';
 
-    // and dump it in the right order
     writeRaw(begin, end);
   }
 

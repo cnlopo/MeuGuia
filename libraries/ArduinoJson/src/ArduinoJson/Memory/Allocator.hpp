@@ -6,7 +6,7 @@
 
 #include <ArduinoJson/Namespace.hpp>
 
-#include <stdlib.h>  // malloc, free
+#include <stdlib.h>
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
@@ -44,6 +44,6 @@ class DefaultAllocator : public Allocator {
   DefaultAllocator() = default;
   ~DefaultAllocator() = default;
 };
-}  // namespace detail
+}
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

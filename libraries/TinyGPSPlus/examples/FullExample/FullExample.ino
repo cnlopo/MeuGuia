@@ -1,17 +1,10 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
-/*
-   This sample code demonstrates the normal use of a TinyGPSPlus (TinyGPSPlus) object.
-   It requires the use of SoftwareSerial, and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
-*/
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 
-// The TinyGPSPlus object
 TinyGPSPlus gps;
 
-// The serial connection to the GPS device
 SoftwareSerial ss(RXPin, TXPin);
 
 void setup()
@@ -76,8 +69,6 @@ void loop()
     Serial.println(F("No GPS data received: check wiring"));
 }
 
-// This custom version of delay() ensures that the gps object
-// is being "fed".
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
@@ -100,7 +91,7 @@ static void printFloat(float val, bool valid, int len, int prec)
   {
     Serial.print(val, prec);
     int vi = abs((int)val);
-    int flen = prec + (val < 0.0 ? 2 : 1); // . and -
+    int flen = prec + (val < 0.0 ? 2 : 1);
     flen += vi >= 1000 ? 4 : vi >= 100 ? 3 : vi >= 10 ? 2 : 1;
     for (int i=flen; i<len; ++i)
       Serial.print(' ');

@@ -45,8 +45,7 @@ class Latch {
   }
 
   TReader reader_;
-  char current_;  // NOLINT(clang-analyzer-optin.cplusplus.UninitializedObject)
-                  // Not initialized in constructor (+10 bytes on AVR)
+  char current_;
   bool loaded_;
 #if ARDUINOJSON_DEBUG
   bool ended_;

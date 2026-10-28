@@ -72,15 +72,15 @@ struct Converter<MsgPackBinary> : private detail::VariantAttorney {
     auto rawstr = data->asRawString();
     auto p = reinterpret_cast<const uint8_t*>(rawstr.c_str());
     auto n = rawstr.size();
-    if (n >= 2 && p[0] == 0xc4) {  // bin 8
+    if (n >= 2 && p[0] == 0xc4) {
       size_t size = p[1];
       if (size + 2 == n)
         return MsgPackBinary(p + 2, size);
-    } else if (n >= 3 && p[0] == 0xc5) {  // bin 16
+    } else if (n >= 3 && p[0] == 0xc5) {
       size_t size = size_t(p[1] << 8) | p[2];
       if (size + 3 == n)
         return MsgPackBinary(p + 3, size);
-    } else if (n >= 5 && p[0] == 0xc6) {  // bin 32
+    } else if (n >= 5 && p[0] == 0xc6) {
       size_t size =
           size_t(p[1] << 24) | size_t(p[2] << 16) | size_t(p[3] << 8) | p[4];
       if (size + 5 == n)

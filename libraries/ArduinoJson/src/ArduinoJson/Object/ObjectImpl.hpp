@@ -84,7 +84,6 @@ inline VariantData* ObjectData::addPair(VariantData** value,
   return keySlot.ptr();
 }
 
-// Returns the size (in bytes) of an object with n members.
 constexpr size_t sizeofObject(size_t n) {
   return 2 * n * ResourceManager::slotSize;
 }

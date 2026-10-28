@@ -79,7 +79,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Pulses") {
-    // "pulses":[50,50,50]
 
     JsonArray array = root["pulses"];
     REQUIRE(array.isNull() == false);
@@ -92,7 +91,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Act") {
-    // "act":[2,1,2,2]
 
     JsonArray array = root["act"];
     REQUIRE(array.isNull() == false);
@@ -105,7 +103,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Detectors") {
-    // "detectors":[[34,34,34,34],[34,34,34,34],[34,34,34,34],[34,34,34,34]]
 
     JsonArray array = root["detectors"];
     REQUIRE(array.isNull() == false);
@@ -122,7 +119,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Alta") {
-    // alta:[2,2,2,2]
 
     JsonArray array = root["alta"];
     REQUIRE(array.isNull() == false);
@@ -135,7 +131,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Altb") {
-    // altb:[2,2,2,2]
 
     JsonArray array = root["altb"];
     REQUIRE(array.isNull() == false);
@@ -148,7 +143,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Measlights") {
-    // "measlights":[[15,15,15,15],[15,15,15,15],[15,15,15,15],[15,15,15,15]]
 
     JsonArray array = root["measlights"];
     REQUIRE(array.isNull() == false);
@@ -166,7 +160,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Measlights2") {
-    // "measlights2":[[15,15,15,15],[15,15,15,15],[15,15,15,15],[15,15,15,15]]
 
     JsonArray array = root["measlights2"];
     REQUIRE(array.isNull() == false);
@@ -183,7 +176,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Altc") {
-    // altc:[2,2,2,2]
 
     JsonArray array = root["altc"];
     REQUIRE(array.isNull() == false);
@@ -196,7 +188,6 @@ TEST_CASE("Gbathree") {
   }
 
   SECTION("Altd") {
-    // altd:[2,2,2,2]
 
     JsonArray array = root["altd"];
     REQUIRE(array.isNull() == false);

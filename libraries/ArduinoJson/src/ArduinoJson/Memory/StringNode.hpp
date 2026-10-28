@@ -10,13 +10,11 @@
 #include <ArduinoJson/Polyfills/integer.hpp>
 #include <ArduinoJson/Polyfills/limits.hpp>
 
-#include <stddef.h>  // offsetof
+#include <stddef.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 struct StringNode {
-  // Use the same type as SlotId to store the reference count
-  // (there can never be more references than slots)
   using references_type = uint_t<ARDUINOJSON_SLOT_ID_SIZE * 8>;
 
   using length_type = uint_t<ARDUINOJSON_STRING_LENGTH_SIZE * 8>;
@@ -36,8 +34,8 @@ struct StringNode {
     if (length > maxLength)
       return nullptr;
     auto size = sizeForLength(length);
-    if (size < length)  // integer overflow
-      return nullptr;   // (not testable on 64-bit)
+    if (size < length)
+      return nullptr;
     auto node = reinterpret_cast<StringNode*>(allocator->allocate(size));
     if (node) {
       node->length = length_type(length);
@@ -67,7 +65,6 @@ struct StringNode {
   }
 };
 
-// Returns the size (in bytes) of an string with n characters.
 constexpr size_t sizeofString(size_t n) {
   return StringNode::sizeForLength(n);
 }

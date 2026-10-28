@@ -20,15 +20,6 @@ TEST_CASE("serialize MsgPack to various destination types") {
     REQUIRE(expected_length == len);
   }
 
-  /*  SECTION("std::vector<char>") {
-      std::vector<char> result;
-      size_t len = serializeMsgPack(object, result);
-
-      REQUIRE(std::vector<char>(expected_result, expected_result + 13) ==
-    result);
-    REQUIRE(expected_length == len);
-    } */
-
   SECTION("char[] larger than needed") {
     char result[64];
     memset(result, 42, sizeof(result));
@@ -39,7 +30,7 @@ TEST_CASE("serialize MsgPack to various destination types") {
     REQUIRE(result[len] == 42);
   }
 
-  SECTION("char[] of the right size") {  // #1545
+  SECTION("char[] of the right size") {
     char result[13];
     size_t len = serializeMsgPack(object, result);
 

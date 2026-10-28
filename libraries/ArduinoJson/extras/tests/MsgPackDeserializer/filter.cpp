@@ -1074,8 +1074,8 @@ TEST_CASE("deserializeMsgPack() filter") {
 
   SECTION("root is fixarray") {
     SECTION("filter = [false, true]") {
-      filter[0] = false;  // only the first elment of the filter matters
-      filter[1] = true;   // so this one is ignored
+      filter[0] = false;
+      filter[1] = true;
 
       SECTION("input = [1,2,3]") {
         error = deserializeMsgPack(doc, "\x93\x01\x02\x03", filterOpt);
@@ -1087,8 +1087,8 @@ TEST_CASE("deserializeMsgPack() filter") {
     }
 
     SECTION("filter = [true, false]") {
-      filter[0] = true;   // only the first elment of the filter matters
-      filter[1] = false;  // so this one is ignored
+      filter[0] = true;
+      filter[1] = false;
 
       SECTION("input = [1,2,3]") {
         error = deserializeMsgPack(doc, "\x93\x01\x02\x03", filterOpt);
@@ -1522,7 +1522,7 @@ TEST_CASE("deserializeMsgPack() filter") {
   }
 }
 
-TEST_CASE("Zero-copy mode") {  // issue #1697
+TEST_CASE("Zero-copy mode") {
   char input[] = "\x82\xA7include\x01\xA6ignore\x02";
 
   JsonDocument filter;
@@ -1541,8 +1541,6 @@ TEST_CASE("Overloads") {
   JsonDocument filter;
 
   using namespace DeserializationOption;
-
-  // deserializeMsgPack(..., Filter)
 
   SECTION("const char*, Filter") {
     deserializeMsgPack(doc, "{}", Filter(filter));
@@ -1570,8 +1568,6 @@ TEST_CASE("Overloads") {
   }
 #endif
 
-  // deserializeMsgPack(..., Filter, NestingLimit)
-
   SECTION("const char*, Filter, NestingLimit") {
     deserializeMsgPack(doc, "{}", Filter(filter), NestingLimit(5));
   }
@@ -1597,8 +1593,6 @@ TEST_CASE("Overloads") {
     deserializeMsgPack(doc, vla, Filter(filter), NestingLimit(5));
   }
 #endif
-
-  // deserializeMsgPack(..., NestingLimit, Filter)
 
   SECTION("const char*, NestingLimit, Filter") {
     deserializeMsgPack(doc, "{}", NestingLimit(5), Filter(filter));

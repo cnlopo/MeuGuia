@@ -19,8 +19,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// uint32 -> int32
-// uint64 -> int32
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_unsigned<TIn>::value &&
                 is_integral<TOut>::value && sizeof(TOut) <= sizeof(TIn),
@@ -29,7 +27,6 @@ canConvertNumber(TIn value) {
   return value <= TIn(numeric_limits<TOut>::highest());
 }
 
-// uint32 -> int64
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_unsigned<TIn>::value &&
                 is_integral<TOut>::value && sizeof(TIn) < sizeof(TOut),
@@ -38,15 +35,12 @@ canConvertNumber(TIn) {
   return true;
 }
 
-// uint32 -> float
-// int32 -> float
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_floating_point<TOut>::value, bool>
 canConvertNumber(TIn) {
   return true;
 }
 
-// int64 -> int32
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_signed<TIn>::value &&
                 is_integral<TOut>::value && is_signed<TOut>::value &&
@@ -57,8 +51,6 @@ canConvertNumber(TIn value) {
          value <= TIn(numeric_limits<TOut>::highest());
 }
 
-// int32 -> int32
-// int32 -> int64
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_signed<TIn>::value &&
                 is_integral<TOut>::value && is_signed<TOut>::value &&
@@ -68,8 +60,6 @@ canConvertNumber(TIn) {
   return true;
 }
 
-// int32 -> uint32
-// int32 -> uint64
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_signed<TIn>::value &&
                 is_integral<TOut>::value && is_unsigned<TOut>::value &&
@@ -81,7 +71,6 @@ canConvertNumber(TIn value) {
   return TOut(value) <= numeric_limits<TOut>::highest();
 }
 
-// int32 -> uint16
 template <typename TOut, typename TIn>
 enable_if_t<is_integral<TIn>::value && is_signed<TIn>::value &&
                 is_integral<TOut>::value && is_unsigned<TOut>::value &&
@@ -93,8 +82,6 @@ canConvertNumber(TIn value) {
   return value <= TIn(numeric_limits<TOut>::highest());
 }
 
-// float32 -> int16
-// float64 -> int32
 template <typename TOut, typename TIn>
 enable_if_t<is_floating_point<TIn>::value && is_integral<TOut>::value &&
                 sizeof(TOut) < sizeof(TIn),
@@ -104,26 +91,15 @@ canConvertNumber(TIn value) {
          value <= numeric_limits<TOut>::highest();
 }
 
-// float32 -> int32
-// float32 -> uint32
-// float32 -> int64
-// float32 -> uint64
-// float64 -> int64
-// float64 -> uint64
 template <typename TOut, typename TIn>
 enable_if_t<is_floating_point<TIn>::value && is_integral<TOut>::value &&
                 sizeof(TOut) >= sizeof(TIn),
             bool>
 canConvertNumber(TIn value) {
-  // Avoid error "9.22337e+18 is outside the range of representable values of
-  // type 'long'"
   return value >= numeric_limits<TOut>::lowest() &&
          value <= FloatTraits<TIn>::template highest_for<TOut>();
 }
 
-// float32 -> float32
-// float64 -> float64
-// float64 -> float32
 template <typename TOut, typename TIn>
 enable_if_t<is_floating_point<TIn>::value && is_floating_point<TOut>::value,
             bool>

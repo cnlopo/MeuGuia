@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// a meta function that tells if the type is a string literal (const char[N])
 template <typename T>
 struct IsStringLiteral : false_type {};
 

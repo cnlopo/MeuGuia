@@ -33,10 +33,9 @@ TEST_CASE("JsonVariant::operator[]") {
 
       REQUIRE(2 == var.size());
       var[0].as<std::string>();
-      // REQUIRE("element at index 0"_s == );
       REQUIRE("element at index 1"_s == var[1]);
       REQUIRE("element at index 0"_s ==
-              var[static_cast<unsigned char>(0)]);  // issue #381
+              var[static_cast<unsigned char>(0)]);
       REQUIRE(var[666].isNull());
       REQUIRE(var[3].isNull());
       REQUIRE(var["0"].isNull());
@@ -64,7 +63,7 @@ TEST_CASE("JsonVariant::operator[]") {
     SECTION("variant[0] when variant contains an integer") {
       var.set(123);
 
-      var[0] = 345;  // no-op
+      var[0] = 345;
 
       REQUIRE(var.is<int>());
       REQUIRE(var.as<int>() == 123);
@@ -104,7 +103,7 @@ TEST_CASE("JsonVariant::operator[]") {
     SECTION("set value, key is a char[]") {
       char key[] = "hello";
       var[key] = "world";
-      key[0] = '!';  // make sure the key is duplicated
+      key[0] = '!';
 
       REQUIRE(1 == var.size());
       REQUIRE("world"_s == var["hello"]);

@@ -34,7 +34,7 @@ TEST_CASE("deserializeJson(char*)") {
           });
 }
 
-TEST_CASE("deserializeJson(unsigned char*, unsigned int)") {  // issue #1897
+TEST_CASE("deserializeJson(unsigned char*, unsigned int)") {
   JsonDocument doc;
 
   unsigned char input[] = "{\"hello\":\"world\"}";
@@ -46,7 +46,7 @@ TEST_CASE("deserializeJson(unsigned char*, unsigned int)") {  // issue #1897
   REQUIRE(err == DeserializationError::Ok);
 }
 
-TEST_CASE("deserializeJson(uint8_t*, size_t)") {  // issue #1898
+TEST_CASE("deserializeJson(uint8_t*, size_t)") {
   JsonDocument doc;
 
   uint8_t input[] = "{\"hello\":\"world\"}";
@@ -79,7 +79,7 @@ TEST_CASE("deserializeJson(const std::string&)") {
     std::string input("[\"hello\"]");
 
     DeserializationError err = deserializeJson(doc, input);
-    input[2] = 'X';  // alter the string tomake sure we made a copy
+    input[2] = 'X';
 
     JsonArray array = doc.as<JsonArray>();
     REQUIRE(err == DeserializationError::Ok);

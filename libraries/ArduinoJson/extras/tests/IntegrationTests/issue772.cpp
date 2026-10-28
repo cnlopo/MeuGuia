@@ -5,8 +5,6 @@
 #include <ArduinoJson.h>
 #include <catch.hpp>
 
-// https://github.com/bblanchon/ArduinoJson/issues/772
-
 TEST_CASE("Issue772") {
   JsonDocument doc1;
   JsonDocument doc2;

@@ -4,8 +4,6 @@
 
 #include <ArduinoJson.h>
 
-// See issue #2135
-
 int main() {
   JsonObject obj;
   deserializeJson(obj, "");

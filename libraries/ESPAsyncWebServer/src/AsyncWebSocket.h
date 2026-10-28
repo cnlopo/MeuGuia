@@ -39,7 +39,7 @@
 
 #ifdef ESP8266
 #include <Hash.h>
-#ifdef CRYPTO_HASH_h // include Hash.h from espressif framework if the first include was from the crypto library
+#ifdef CRYPTO_HASH_h
 #include <../src/Hash.h>
 #endif
 #endif
@@ -56,26 +56,13 @@ class AsyncWebSocketClient;
 class AsyncWebSocketControl;
 
 typedef struct {
-    /** Message type as defined by enum AwsFrameType.
-     * Note: Applications will only see WS_TEXT and WS_BINARY.
-     * All other types are handled by the library. */
     uint8_t message_opcode;
-    /** Frame number of a fragmented message. */
     uint32_t num;
-    /** Is this the last frame in a fragmented message ?*/
     uint8_t final;
-    /** Is this frame masked? */
     uint8_t masked;
-    /** Message type as defined by enum AwsFrameType.
-     * This value is the same as message_opcode for non-fragmented
-     * messages, but may also be WS_CONTINUATION in a fragmented message. */
     uint8_t opcode;
-    /** Length of the current frame.
-     * This equals the total length of the message if num == 0 && final == true */
     uint64_t len;
-    /** Mask key */
     uint8_t mask[4];
-    /** Offset of the data inside the current frame. */
     uint64_t index;
 } AwsFrameInfo;
 
@@ -184,7 +171,6 @@ class AsyncWebSocketClient {
     AsyncWebSocketClient(AsyncWebServerRequest *request, AsyncWebSocket *server);
     ~AsyncWebSocketClient();
 
-    //client id increments for the given server
     uint32_t id(){ return _clientId; }
     AwsClientStatus status(){ return _status; }
     AsyncClient* client(){ return _client; }
@@ -194,11 +180,9 @@ class AsyncWebSocketClient {
     IPAddress remoteIP();
     uint16_t  remotePort();
 
-    //control frames
     void close(uint16_t code=0, const char * message=NULL);
     void ping(uint8_t *data=NULL, size_t len=0);
 
-    //set auto-ping period in seconds. disabled if zero (default)
     void keepAlivePeriod(uint16_t seconds){
       _keepAlivePeriod = seconds * 1000;
     }
@@ -206,7 +190,6 @@ class AsyncWebSocketClient {
       return (uint16_t)(_keepAlivePeriod / 1000);
     }
 
-    //data packets
     void message(AsyncWebSocketMessage *message){ _queueMessage(message); }
     bool queueIsFull();
 
@@ -232,7 +215,6 @@ class AsyncWebSocketClient {
 
     bool canSend() { return _messageQueue.length() < WS_MAX_QUEUED_MESSAGES; }
 
-    //system callbacks (do not call)
     void _onAck(size_t len, uint32_t time);
     void _onError(int8_t);
     void _onPoll();
@@ -243,7 +225,6 @@ class AsyncWebSocketClient {
 
 typedef std::function<void(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len)> AwsEventHandler;
 
-//WebServer Handler implementation that plays the role of a socket server
 class AsyncWebSocket: public AsyncWebHandler {
   public:
     typedef LinkedList<AsyncWebSocketClient *> AsyncWebSocketClientLinkedList;
@@ -273,7 +254,7 @@ class AsyncWebSocket: public AsyncWebHandler {
     void cleanupClients(uint16_t maxClients = DEFAULT_MAX_WS_CLIENTS);
 
     void ping(uint32_t id, uint8_t *data=NULL, size_t len=0);
-    void pingAll(uint8_t *data=NULL, size_t len=0); //  done
+    void pingAll(uint8_t *data=NULL, size_t len=0);
 
     void text(uint32_t id, const char * message, size_t len);
     void text(uint32_t id, const char * message);
@@ -287,7 +268,7 @@ class AsyncWebSocket: public AsyncWebHandler {
     void textAll(uint8_t * message, size_t len);
     void textAll(char * message);
     void textAll(const String &message);
-    void textAll(const __FlashStringHelper *message); //  need to convert
+    void textAll(const __FlashStringHelper *message);
     void textAll(AsyncWebSocketMessageBuffer * buffer); 
 
     void binary(uint32_t id, const char * message, size_t len);
@@ -315,12 +296,10 @@ class AsyncWebSocket: public AsyncWebHandler {
 #endif
     size_t printfAll_P(PGM_P formatP, ...)  __attribute__ ((format (printf, 2, 3)));
 
-    //event listener
     void onEvent(AwsEventHandler handler){
       _eventHandler = handler;
     }
 
-    //system callbacks (do not call)
     uint32_t _getNextId(){ return _cNextId++; }
     void _addClient(AsyncWebSocketClient * client);
     void _handleDisconnect(AsyncWebSocketClient * client);
@@ -329,7 +308,6 @@ class AsyncWebSocket: public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest *request) override final;
 
 
-    //  messagebuffer functions/objects. 
     AsyncWebSocketMessageBuffer * makeBuffer(size_t size = 0); 
     AsyncWebSocketMessageBuffer * makeBuffer(uint8_t * data, size_t size); 
     LinkedList<AsyncWebSocketMessageBuffer *> _buffers;
@@ -338,7 +316,6 @@ class AsyncWebSocket: public AsyncWebHandler {
     AsyncWebSocketClientLinkedList getClients() const;
 };
 
-//WebServer response to authenticate the socket and detach the tcp client from the web server request
 class AsyncWebSocketResponse: public AsyncWebServerResponse {
   private:
     String _content;
@@ -351,4 +328,4 @@ class AsyncWebSocketResponse: public AsyncWebServerResponse {
 };
 
 
-#endif /* ASYNCWEBSOCKET_H_ */
+#endif

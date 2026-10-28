@@ -9,12 +9,10 @@
 #include <ArduinoJson.h>
 
 void setup() {
-  // Initialize serial port
   Serial.begin(9600);
   while (!Serial)
     continue;
 
-  // The huge input: an extract from OpenWeatherMap response
   auto input_json = F(
       "{\"cod\":\"200\",\"message\":0,\"list\":[{\"dt\":1581498000,\"main\":{"
       "\"temp\":3.23,\"feels_like\":-3.63,\"temp_min\":3.23,\"temp_max\":4.62,"
@@ -33,32 +31,15 @@ void setup() {
       "\"lat\":51.5085,\"lon\":-0.1257},\"country\":\"GB\",\"population\":"
       "1000000,\"timezone\":0,\"sunrise\":1581492085,\"sunset\":1581527294}}");
 
-  // The filter: it contains "true" for each value we want to keep
   JsonDocument filter;
   filter["list"][0]["dt"] = true;
   filter["list"][0]["main"]["temp"] = true;
 
-  // Deserialize the document
   JsonDocument doc;
   deserializeJson(doc, input_json, DeserializationOption::Filter(filter));
 
-  // Print the result
   serializeJsonPretty(doc, Serial);
 }
 
 void loop() {
-  // not used in this example
 }
-
-// See also
-// --------
-//
-// https://arduinojson.org/ contains the documentation for all the functions
-// used above. It also includes an FAQ that will help you solve any
-// deserialization problem.
-//
-// The book "Mastering ArduinoJson" contains a tutorial on deserialization.
-// It begins with a simple example, like the one above, and then adds more
-// features like deserializing directly from a file or an HTTP request.
-// Learn more at https://arduinojson.org/book/
-// Use the coupon code TWENTY for a 20% discount ❤❤❤❤❤

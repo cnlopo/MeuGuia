@@ -15,11 +15,11 @@ TEST_CASE("JsonObjectConst::operator[]") {
   JsonObjectConst obj = doc.as<JsonObjectConst>();
 
   SECTION("supports const char*") {
-    REQUIRE(obj["hello"] == "world");  // issue #2019
+    REQUIRE(obj["hello"] == "world");
   }
 
   SECTION("supports std::string") {
-    REQUIRE(obj["hello"_s] == "world");  // issue #2019
+    REQUIRE(obj["hello"_s] == "world");
     REQUIRE(obj["a\0b"_s] == "ABC");
   }
 

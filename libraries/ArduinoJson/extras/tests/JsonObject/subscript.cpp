@@ -21,7 +21,7 @@ TEST_CASE("JsonObject::operator[]") {
     REQUIRE(false == obj["hello"].is<bool>());
   }
 
-  SECTION("volatile int") {  // issue #415
+  SECTION("volatile int") {
     volatile int i = 123;
     obj["hello"] = i;
 
@@ -96,7 +96,7 @@ TEST_CASE("JsonObject::operator[]") {
     REQUIRE(42 == obj["a"]);
   }
 
-  SECTION("char key[]") {  // issue #423
+  SECTION("char key[]") {
     char key[] = "hello";
     obj[key] = 42;
     REQUIRE(42 == obj[key]);
@@ -173,7 +173,6 @@ TEST_CASE("JsonObject::operator[]") {
   }
 
   SECTION("should ignore null key") {
-    // object must have a value to make a call to strcmp()
     obj["dummy"] = 42;
 
     const char* null = 0;
@@ -201,7 +200,7 @@ TEST_CASE("JsonObject::operator[]") {
     REQUIRE("world"_s == obj["hello"]);
   }
 
-  SECTION("obj[str] = VLA") {  // issue #416
+  SECTION("obj[str] = VLA") {
     size_t i = 32;
     char vla[i];
     strcpy(vla, "world");

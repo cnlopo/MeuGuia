@@ -17,7 +17,6 @@ public:
   virtual ~CaptiveRequestHandler() {}
 
   bool canHandle(AsyncWebServerRequest *request){
-    //request->addInterestingHeader("ANY");
     return true;
   }
 
@@ -34,11 +33,9 @@ public:
 
 
 void setup(){
-  //your other setup stuff...
   WiFi.softAP("esp-captive");
   dnsServer.start(53, "*", WiFi.softAPIP());
-  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
-  //more handlers...
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
   server.begin();
 }
 

@@ -10,28 +10,22 @@
 
 TEST_CASE("deserializeJson() returns IncompleteInput") {
   const char* testCases[] = {
-      // strings
       "\"\\",
       "\"hello",
       "\'hello",
-      // unicode
       "'\\u",
       "'\\u00",
       "'\\u000",
-      // false
       "f",
       "fa",
       "fal",
       "fals",
-      // true
       "t",
       "tr",
       "tru",
-      // null
       "n",
       "nu",
       "nul",
-      // object
       "{",
       "{a",
       "{a:",
@@ -52,13 +46,9 @@ TEST_CASE("deserializeJson() returns IncompleteInput") {
 
 TEST_CASE("deserializeJson() returns InvalidInput") {
   const char* testCases[] = {
-      // unicode
       "'\\u'", "'\\u000g'", "'\\u000'", "'\\u000G'", "'\\u000/'", "\\x1234",
-      // numbers
       "6a9", "1,", "2]", "3}",
-      // constants
       "nulL", "tru3", "fals3",
-      // garbage
       "%*$£¤"};
 
   for (auto input : testCases) {
@@ -72,9 +62,9 @@ TEST_CASE("deserializeJson() returns InvalidInput") {
 
 TEST_CASE("deserializeJson() oversees some edge cases") {
   const char* testCases[] = {
-      "'\\ud83d'",         // leading surrogate without a trailing surrogate
-      "'\\udda4'",         // trailing surrogate without a leading surrogate
-      "'\\ud83d\\ud83d'",  // two leading surrogates
+      "'\\ud83d'",
+      "'\\udda4'",
+      "'\\ud83d\\ud83d'",
   };
 
   for (auto input : testCases) {

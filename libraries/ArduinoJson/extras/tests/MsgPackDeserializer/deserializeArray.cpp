@@ -46,7 +46,6 @@ TEST_CASE("deserialize MsgPack array") {
       REQUIRE(spy.log() == AllocatorLog{
                                Allocate(sizeofPool()),
                                Allocate(sizeofString("xxx")),
-                               // Buffer is reused for the next string
                                Deallocate(sizeofString("xxx")),
                                Reallocate(sizeofPool(), sizeofPool(2)),
                            });

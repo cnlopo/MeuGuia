@@ -1,11 +1,3 @@
-#######################################
-# Syntax Coloring Map for TinyGPSPlus
-#######################################
-
-#######################################
-# Datatypes (KEYWORD1)
-#######################################
-
 TinyGPSPlus	KEYWORD1
 TinyGPSLocation	KEYWORD1
 TinyGPSDate	KEYWORD1
@@ -16,10 +8,6 @@ TinyGPSAltitude	KEYWORD1
 TinyGPSInteger	KEYWORD1
 TinyGPSDecimal	KEYWORD1
 TinyGPSCustom	KEYWORD1
-
-#######################################
-# Methods and Functions (KEYWORD2)
-#######################################
 
 encode	KEYWORD2
 location	KEYWORD2
@@ -64,8 +52,3 @@ meters	KEYWORD2
 miles	KEYWORD2
 kilometers	KEYWORD2
 feet	KEYWORD2
-
-#######################################
-# Constants (LITERAL1)
-#######################################
-

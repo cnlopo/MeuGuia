@@ -49,17 +49,13 @@ TinyGPSPlus::TinyGPSPlus()
   term[0] = '\0';
 }
 
-//
-// public methods
-//
-
 bool TinyGPSPlus::encode(char c)
 {
   ++encodedCharCount;
 
   switch(c)
   {
-  case ',': // term terminators
+  case ',':
     parity ^= (uint8_t)c;
   case '\r':
   case '\n':
@@ -78,7 +74,7 @@ bool TinyGPSPlus::encode(char c)
     }
     break;
 
-  case '$': // sentence begin
+  case '$':
     curTermNumber = curTermOffset = 0;
     parity = 0;
     curSentenceType = GPS_SENTENCE_OTHER;
@@ -86,7 +82,7 @@ bool TinyGPSPlus::encode(char c)
     sentenceHasFix = false;
     return false;
 
-  default: // ordinary characters
+  default:
     if (curTermOffset < sizeof(term) - 1)
       term[curTermOffset++] = c;
     if (!isChecksumTerm)
@@ -97,9 +93,6 @@ bool TinyGPSPlus::encode(char c)
   return false;
 }
 
-//
-// internal utilities
-//
 int TinyGPSPlus::fromHex(char a)
 {
   if (a >= 'A' && a <= 'F')
@@ -110,8 +103,6 @@ int TinyGPSPlus::fromHex(char a)
     return a - '0';
 }
 
-// static
-// Parse a (potentially negative) number with up to 2 decimal digits -xxxx.yy
 int32_t TinyGPSPlus::parseDecimal(const char *term)
 {
   bool negative = *term == '-';
@@ -127,8 +118,6 @@ int32_t TinyGPSPlus::parseDecimal(const char *term)
   return negative ? -ret : ret;
 }
 
-// static
-// Parse degrees in that funny NMEA format DDMM.MMMM
 void TinyGPSPlus::parseDegrees(const char *term, RawDegrees &deg)
 {
   uint32_t leftOfDecimal = (uint32_t)atol(term);
@@ -154,11 +143,8 @@ void TinyGPSPlus::parseDegrees(const char *term, RawDegrees &deg)
 
 #define COMBINE(sentence_type, term_number) (((unsigned)(sentence_type) << 5) | term_number)
 
-// Processes a just-completed term
-// Returns true if new sentence has just passed checksum test and is validated
 bool TinyGPSPlus::endOfTermHandler()
 {
-  // If it's the checksum term, and the checksum checks out, commit
   if (isChecksumTerm)
   {
     byte checksum = 16 * fromHex(term[0]) + fromHex(term[1]);
@@ -192,7 +178,6 @@ bool TinyGPSPlus::endOfTermHandler()
         break;
       }
 
-      // Commit all custom listeners of this sentence type
       for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0; p = p->next)
          p->commit();
       return true;
@@ -206,7 +191,6 @@ bool TinyGPSPlus::endOfTermHandler()
     return false;
   }
 
-  // the first term determines the sentence type
   if (curTermNumber == 0)
   {
     if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
@@ -216,7 +200,6 @@ bool TinyGPSPlus::endOfTermHandler()
     else
       curSentenceType = GPS_SENTENCE_OTHER;
 
-    // Any custom candidates of this sentence type?
     for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next);
     if (customCandidates != NULL && strcmp(customCandidates->sentenceName, term) > 0)
        customCandidates = NULL;
@@ -227,53 +210,52 @@ bool TinyGPSPlus::endOfTermHandler()
   if (curSentenceType != GPS_SENTENCE_OTHER && term[0])
     switch(COMBINE(curSentenceType, curTermNumber))
   {
-    case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
+    case COMBINE(GPS_SENTENCE_GPRMC, 1):
     case COMBINE(GPS_SENTENCE_GPGGA, 1):
       time.setTime(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
+    case COMBINE(GPS_SENTENCE_GPRMC, 2):
       sentenceHasFix = term[0] == 'A';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 3): // Latitude
+    case COMBINE(GPS_SENTENCE_GPRMC, 3):
     case COMBINE(GPS_SENTENCE_GPGGA, 2):
       location.setLatitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 4): // N/S
+    case COMBINE(GPS_SENTENCE_GPRMC, 4):
     case COMBINE(GPS_SENTENCE_GPGGA, 3):
       location.rawNewLatData.negative = term[0] == 'S';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 5): // Longitude
+    case COMBINE(GPS_SENTENCE_GPRMC, 5):
     case COMBINE(GPS_SENTENCE_GPGGA, 4):
       location.setLongitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 6): // E/W
+    case COMBINE(GPS_SENTENCE_GPRMC, 6):
     case COMBINE(GPS_SENTENCE_GPGGA, 5):
       location.rawNewLngData.negative = term[0] == 'W';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 7): // Speed (GPRMC)
+    case COMBINE(GPS_SENTENCE_GPRMC, 7):
       speed.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 8): // Course (GPRMC)
+    case COMBINE(GPS_SENTENCE_GPRMC, 8):
       course.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 9): // Date (GPRMC)
+    case COMBINE(GPS_SENTENCE_GPRMC, 9):
       date.setDate(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 6): // Fix data (GPGGA)
+    case COMBINE(GPS_SENTENCE_GPGGA, 6):
       sentenceHasFix = term[0] > '0';
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 7): // Satellites used (GPGGA)
+    case COMBINE(GPS_SENTENCE_GPGGA, 7):
       satellites.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 8): // HDOP
+    case COMBINE(GPS_SENTENCE_GPGGA, 8):
       hdop.set(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPGGA, 9): // Altitude (GPGGA)
+    case COMBINE(GPS_SENTENCE_GPGGA, 9):
       altitude.set(term);
       break;
   }
 
-  // Set custom values as needed
   for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
     if (p->termNumber == curTermNumber)
          p->set(term);
@@ -281,14 +263,8 @@ bool TinyGPSPlus::endOfTermHandler()
   return false;
 }
 
-/* static */
 double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
 {
-  // returns distance in meters between two positions, both specified
-  // as signed decimal-degrees latitude and longitude. Uses great-circle
-  // distance computation for hypothetical sphere of radius 6372795 meters.
-  // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
-  // Courtesy of Maarten Lamers
   double delta = radians(long1-long2);
   double sdlong = sin(delta);
   double cdlong = cos(delta);
@@ -309,10 +285,6 @@ double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, doub
 
 double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long2)
 {
-  // returns course in degrees (North=0, West=270) from position 1 to position 2,
-  // both specified as signed decimal-degrees latitude and longitude.
-  // Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
-  // Courtesy of Maarten Lamers
   double dlon = radians(long2-long1);
   lat1 = radians(lat1);
   lat2 = radians(lat2);
@@ -471,7 +443,6 @@ void TinyGPSCustom::begin(TinyGPSPlus &gps, const char *_sentenceName, int _term
    memset(stagingBuffer, '\0', sizeof(stagingBuffer));
    memset(buffer, '\0', sizeof(buffer));
 
-   // Insert this item into the GPS tree
    gps.insertCustom(this, _sentenceName, _termNumber);
 }
 

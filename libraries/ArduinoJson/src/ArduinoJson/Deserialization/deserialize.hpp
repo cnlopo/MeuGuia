@@ -11,8 +11,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that returns the first type of the parameter pack
-// or void if empty
 template <typename...>
 struct first_or_void {
   using type = void;
@@ -22,8 +20,6 @@ struct first_or_void<T, Rest...> {
   using type = T;
 };
 
-// A meta-function that returns true if T is a valid destination type for
-// deserialize()
 template <class T>
 using is_deserialize_destination =
     bool_constant<is_base_of<JsonDocument, remove_cv_t<T>>::value ||
@@ -31,7 +27,6 @@ using is_deserialize_destination =
 
 template <typename TDestination>
 inline void shrinkJsonDocument(TDestination&) {
-  // no-op by default
 }
 
 #if ARDUINOJSON_AUTO_SHRINK
@@ -58,7 +53,7 @@ DeserializationError doDeserialize(TDestination&& dst, TReader reader,
 template <
     template <typename> class TDeserializer, typename TDestination,
     typename TStream, typename... Args,
-    enable_if_t<  // issue #1897
+    enable_if_t<
         !is_integral<typename first_or_void<Args...>::type>::value, int> = 0>
 DeserializationError deserialize(TDestination&& dst, TStream&& input,
                                  Args... args) {
