@@ -122,7 +122,7 @@ TEST_CASE("JsonVariant::remove(JsonVariant) from array") {
   var[2] = 1;
 
   var.remove(var[2]);
-  var.remove(var[3]);  // noop
+  var.remove(var[3]);
 
   REQUIRE(var.as<std::string>() == "[3,1]");
 }

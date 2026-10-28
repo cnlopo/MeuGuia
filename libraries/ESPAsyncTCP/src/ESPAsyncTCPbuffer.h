@@ -25,8 +25,6 @@
 #ifndef ESPASYNCTCPBUFFER_H_
 #define ESPASYNCTCPBUFFER_H_
 
-//#define DEBUG_ASYNC_TCP(...)  while(((U0S >> USTXC) & 0x7F) != 0x00); os_printf( __VA_ARGS__ ); while(((U0S >> USTXC) & 0x7F) != 0x00)
-//#define DEBUG_ASYNC_TCP ASYNC_TCP_DEBUG
 #ifndef DEBUG_ASYNC_TCP
 #define DEBUG_ASYNC_TCP(...)
 #endif
@@ -69,15 +67,8 @@ class AsyncTCPbuffer: public Print {
 
         void readStringUntil(char terminator, String * str, AsyncTCPbufferDoneCb done);
 
-        // TODO implement read terminator non string
-        //void readBytesUntil(char terminator, char *buffer, size_t length, AsyncTCPbufferDoneCb done);
-        //void readBytesUntil(char terminator, uint8_t *buffer, size_t length, AsyncTCPbufferDoneCb done);
-
         void readBytes(char *buffer, size_t length, AsyncTCPbufferDoneCb done);
         void readBytes(uint8_t *buffer, size_t length, AsyncTCPbufferDoneCb done);
-
-        // TODO implement
-        // void setTimeout(size_t timeout);
 
         void onData(AsyncTCPbufferDataCb cb);
         void onDisconnect(AsyncTCPbufferDisconnectCb cb);
@@ -115,4 +106,4 @@ class AsyncTCPbuffer: public Print {
 
 };
 
-#endif /* ESPASYNCTCPBUFFER_H_ */
+#endif

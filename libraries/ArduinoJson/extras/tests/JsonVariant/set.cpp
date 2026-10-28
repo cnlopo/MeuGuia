@@ -22,7 +22,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
 
     REQUIRE(result == true);
     CHECK(variant ==
-          "hello"_s);  // linked string cannot contain '\0' at the moment
+          "hello"_s);
     CHECK(spy.log() == AllocatorLog{});
   }
 
@@ -34,7 +34,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -57,7 +57,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -71,7 +71,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "def");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "abc");  // stores by copy
+    REQUIRE(variant == "abc");
     REQUIRE(spy.log() == AllocatorLog{});
   }
 
@@ -91,7 +91,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -105,7 +105,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -121,7 +121,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -134,7 +134,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     str.replace(0, 5, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello\0world"_s);  // stores by copy
+    REQUIRE(variant == "hello\0world"_s);
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello?world")),
                          });
@@ -148,7 +148,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "world");  // stores by pointer
+    REQUIRE(variant == "world");
     REQUIRE(spy.log() == AllocatorLog{});
   }
 
@@ -160,7 +160,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     strcpy(str, "world");
 
     REQUIRE(result == true);
-    REQUIRE(variant == "hello");  // stores by copy
+    REQUIRE(variant == "hello");
     REQUIRE(spy.log() == AllocatorLog{
                              Allocate(sizeofString("hello")),
                          });
@@ -196,7 +196,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     REQUIRE(spy.log() ==
             AllocatorLog{
                 Allocate(sizeofPool()),
-                Reallocate(sizeofPool(), sizeofPool(1)),  // one extension slot
+                Reallocate(sizeofPool(), sizeofPool(1)),
             });
   }
 
@@ -219,7 +219,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     REQUIRE(spy.log() ==
             AllocatorLog{
                 Allocate(sizeofPool()),
-                Reallocate(sizeofPool(), sizeofPool(1)),  // one extension slot
+                Reallocate(sizeofPool(), sizeofPool(1)),
             });
   }
 
@@ -242,7 +242,7 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     REQUIRE(spy.log() ==
             AllocatorLog{
                 Allocate(sizeofPool()),
-                Reallocate(sizeofPool(), sizeofPool(1)),  // one extension slot
+                Reallocate(sizeofPool(), sizeofPool(1)),
             });
   }
 
@@ -250,7 +250,6 @@ TEST_CASE("JsonVariant::set() when there is enough memory") {
     JsonDocument doc1;
     doc1["hello"] = "world";
 
-    // Should copy the doc
     variant.set(doc1);
     doc1.clear();
 

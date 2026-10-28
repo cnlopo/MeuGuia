@@ -30,11 +30,9 @@ TEST_CASE("JsonArray::clear()") {
     JsonDocument doc(&spy);
     JsonArray array = doc.to<JsonArray>();
 
-    // fill the pool entirely
     for (int i = 0; i < ARDUINOJSON_POOL_CAPACITY; i++)
       array.add(i);
 
-    // clear and fill again
     array.clear();
     for (int i = 0; i < ARDUINOJSON_POOL_CAPACITY; i++)
       array.add(i);

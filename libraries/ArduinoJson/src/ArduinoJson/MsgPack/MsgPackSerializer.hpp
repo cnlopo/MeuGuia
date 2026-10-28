@@ -216,8 +216,6 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// Produces a MessagePack document.
-// https://arduinojson.org/v7/api/msgpack/serializemsgpack/
 template <
     typename TDestination,
     detail::enable_if_t<!detail::is_pointer<TDestination>::value, int> = 0>
@@ -226,16 +224,12 @@ inline size_t serializeMsgPack(JsonVariantConst source, TDestination& output) {
   return serialize<MsgPackSerializer>(source, output);
 }
 
-// Produces a MessagePack document.
-// https://arduinojson.org/v7/api/msgpack/serializemsgpack/
 inline size_t serializeMsgPack(JsonVariantConst source, void* output,
                                size_t size) {
   using namespace ArduinoJson::detail;
   return serialize<MsgPackSerializer>(source, output, size);
 }
 
-// Computes the length of the document that serializeMsgPack() produces.
-// https://arduinojson.org/v7/api/msgpack/measuremsgpack/
 inline size_t measureMsgPack(JsonVariantConst source) {
   using namespace ArduinoJson::detail;
   return measure<MsgPackSerializer>(source);

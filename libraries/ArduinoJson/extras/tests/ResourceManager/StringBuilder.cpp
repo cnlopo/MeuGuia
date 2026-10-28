@@ -136,7 +136,7 @@ TEST_CASE("StringBuilder::save() deduplicates strings") {
 
     REQUIRE(s1.asString() == "hello");
     REQUIRE(s2.asString() == "world");
-    REQUIRE(+s1.asString().c_str() == +s3.asString().c_str());  // same address
+    REQUIRE(+s1.asString().c_str() == +s3.asString().c_str());
 
     REQUIRE(spy.log() ==
             AllocatorLog{
@@ -155,7 +155,7 @@ TEST_CASE("StringBuilder::save() deduplicates strings") {
     REQUIRE(s1.asString() == "hello world");
     REQUIRE(s2.asString() == "hello");
     REQUIRE(+s2.asString().c_str() !=
-            +s1.asString().c_str());  // different address
+            +s1.asString().c_str());
 
     REQUIRE(spy.log() ==
             AllocatorLog{
@@ -173,7 +173,7 @@ TEST_CASE("StringBuilder::save() deduplicates strings") {
     REQUIRE(s1.asString() == "hello world");
     REQUIRE(s2.asString() == "worl");
     REQUIRE(s2.asString().c_str() !=
-            s1.asString().c_str());  // different address
+            s1.asString().c_str());
 
     REQUIRE(spy.log() ==
             AllocatorLog{

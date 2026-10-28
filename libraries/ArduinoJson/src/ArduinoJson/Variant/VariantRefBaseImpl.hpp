@@ -18,7 +18,7 @@ inline JsonVariant VariantRefBase<TDerived>::add() const {
 template <typename TDerived>
 template <typename T>
 inline T VariantRefBase<TDerived>::as() const {
-  using variant_type =  // JsonVariantConst or JsonVariant?
+  using variant_type =
       typename function_traits<decltype(&Converter<T>::fromJson)>::arg1_type;
   return Converter<T>::fromJson(getVariant<variant_type>());
 }
@@ -107,7 +107,7 @@ inline JsonVariant VariantRefBase<TDerived>::getOrCreateVariant() const {
 template <typename TDerived>
 template <typename T>
 inline bool VariantRefBase<TDerived>::is() const {
-  using variant_type =  // JsonVariantConst or JsonVariant?
+  using variant_type =
       typename function_traits<decltype(&Converter<T>::checkJson)>::arg1_type;
   return Converter<T>::checkJson(getVariant<variant_type>());
 }

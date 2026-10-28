@@ -50,7 +50,6 @@ class MsgPackDeserializer {
     bool allowValue = filter.allowValue();
 
     if (allowValue) {
-      // callers pass a null pointer only when value must be ignored
       ARDUINOJSON_ASSERT(variant != 0);
     }
 
@@ -64,7 +63,6 @@ class MsgPackDeserializer {
 
     switch (code) {
       case 0xc0:
-        // already null
         return DeserializationError::Ok;
 
       case 0xc1:
@@ -89,7 +87,7 @@ class MsgPackDeserializer {
           return skipBytes(8);
     }
 
-    if (code <= 0x7f || code >= 0xe0) {  // fixint
+    if (code <= 0x7f || code >= 0xe0) {
       if (allowValue)
         variant->setInteger(static_cast<int8_t>(code), resources_);
       return DeserializationError::Ok;
@@ -100,43 +98,43 @@ class MsgPackDeserializer {
     bool isExtension = code >= 0xc7 && code <= 0xc9;
 
     switch (code) {
-      case 0xc4:  // bin 8
-      case 0xc7:  // ext 8
-      case 0xd9:  // str 8
+      case 0xc4:
+      case 0xc7:
+      case 0xd9:
         sizeBytes = 1;
         break;
 
-      case 0xc5:  // bin 16
-      case 0xc8:  // ext 16
-      case 0xda:  // str 16
-      case 0xdc:  // array 16
-      case 0xde:  // map 16
+      case 0xc5:
+      case 0xc8:
+      case 0xda:
+      case 0xdc:
+      case 0xde:
         sizeBytes = 2;
         break;
 
-      case 0xc6:  // bin 32
-      case 0xc9:  // ext 32
-      case 0xdb:  // str 32
-      case 0xdd:  // array 32
-      case 0xdf:  // map 32
+      case 0xc6:
+      case 0xc9:
+      case 0xdb:
+      case 0xdd:
+      case 0xdf:
         sizeBytes = 4;
         break;
     }
 
-    if (code >= 0xd4 && code <= 0xd8) {  // fixext
+    if (code >= 0xd4 && code <= 0xd8) {
       size = size_t(1) << (code - 0xd4);
       isExtension = true;
     }
 
     switch (code & 0xf0) {
-      case 0x90:  // fixarray
-      case 0x80:  // fixmap
+      case 0x90:
+      case 0x80:
         size = code & 0x0F;
         break;
     }
 
     switch (code & 0xe0) {
-      case 0xa0:  // fixstr
+      case 0xa0:
         size = code & 0x1f;
         break;
     }
@@ -151,19 +149,16 @@ class MsgPackDeserializer {
         size32 = (size32 << 8) | header[i + 1];
 
       size = size_t(size32);
-      if (size < size32)                        // integer overflow
-        return DeserializationError::NoMemory;  // (not testable on 32/64-bit)
+      if (size < size32)
+        return DeserializationError::NoMemory;
     }
 
-    // array 16, 32 and fixarray
     if (code == 0xdc || code == 0xdd || (code & 0xf0) == 0x90)
       return readArray(variant, size, filter, nestingLimit);
 
-    // map 16, 32 and fixmap
     if (code == 0xde || code == 0xdf || (code & 0xf0) == 0x80)
       return readObject(variant, size, filter, nestingLimit);
 
-    // str 8, 16, 32 and fixstr
     if (code == 0xd9 || code == 0xda || code == 0xdb || (code & 0xe0) == 0xa0) {
       if (allowValue)
         return readString(variant, size);
@@ -172,7 +167,7 @@ class MsgPackDeserializer {
     }
 
     if (isExtension)
-      size++;  // to include the type
+      size++;
 
     if (allowValue)
       return readRawString(variant, header, uint8_t(1 + sizeBytes), size);
@@ -221,7 +216,7 @@ class MsgPackDeserializer {
     };
 
     if (isSigned)
-      signedValue = static_cast<int8_t>(buffer[0]);  // propagate sign bit
+      signedValue = static_cast<int8_t>(buffer[0]);
     else
       unsignedValue = static_cast<uint8_t>(buffer[0]);
 
@@ -234,13 +229,11 @@ class MsgPackDeserializer {
         if (!variant->setInteger(truncatedValue, resources_))
           return DeserializationError::NoMemory;
       }
-      // else set null on overflow
     } else {
       auto truncatedValue = static_cast<JsonUInt>(unsignedValue);
       if (truncatedValue == unsignedValue)
         if (!variant->setInteger(truncatedValue, resources_))
           return DeserializationError::NoMemory;
-      // else set null on overflow
     }
 
     return DeserializationError::Ok;
@@ -283,8 +276,8 @@ class MsgPackDeserializer {
   enable_if_t<sizeof(T) == 4, DeserializationError::Code> readDouble(
       VariantData* variant) {
     DeserializationError::Code err;
-    uint8_t i[8];  // input is 8 bytes
-    T value;       // output is 4 bytes
+    uint8_t i[8];
+    T value;
     uint8_t* o = reinterpret_cast<uint8_t*>(&value);
 
     err = readBytes(i, 8);
@@ -321,8 +314,8 @@ class MsgPackDeserializer {
                                            const void* header,
                                            uint8_t headerSize, size_t n) {
     auto totalSize = size_t(headerSize + n);
-    if (totalSize < n)                        // integer overflow
-      return DeserializationError::NoMemory;  // (not testable on 64-bit)
+    if (totalSize < n)
+      return DeserializationError::NoMemory;
 
     char* p = stringBuffer_.reserve(totalSize);
     if (!p)
@@ -459,8 +452,6 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// Parses a MessagePack input and puts the result in a JsonDocument.
-// https://arduinojson.org/v7/api/msgpack/deserializemsgpack/
 template <typename TDestination, typename... Args,
           detail::enable_if_t<
               detail::is_deserialize_destination<TDestination>::value, int> = 0>
@@ -471,8 +462,6 @@ inline DeserializationError deserializeMsgPack(TDestination&& dst,
                                           detail::forward<Args>(args)...);
 }
 
-// Parses a MessagePack input and puts the result in a JsonDocument.
-// https://arduinojson.org/v7/api/msgpack/deserializemsgpack/
 template <typename TDestination, typename TChar, typename... Args,
           detail::enable_if_t<
               detail::is_deserialize_destination<TDestination>::value, int> = 0>

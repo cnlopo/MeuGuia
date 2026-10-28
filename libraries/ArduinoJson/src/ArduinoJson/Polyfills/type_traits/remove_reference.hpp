@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that return the type T without the reference modifier.
 template <typename T>
 struct remove_reference {
   using type = T;

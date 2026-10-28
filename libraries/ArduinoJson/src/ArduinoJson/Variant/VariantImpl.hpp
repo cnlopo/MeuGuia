@@ -12,7 +12,7 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename T>
 inline void VariantData::setRawString(SerializedValue<T> value,
                                       ResourceManager* resources) {
-  ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+  ARDUINOJSON_ASSERT(type_ == VariantType::Null);
   auto dup = resources->saveString(adaptString(value.data(), value.size()));
   if (dup)
     setRawString(dup);
@@ -21,7 +21,7 @@ inline void VariantData::setRawString(SerializedValue<T> value,
 template <typename TAdaptedString>
 inline bool VariantData::setString(TAdaptedString value,
                                    ResourceManager* resources) {
-  ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+  ARDUINOJSON_ASSERT(type_ == VariantType::Null);
 
   if (value.isNull())
     return false;
@@ -73,8 +73,8 @@ inline const VariantExtension* VariantData::getExtension(
 template <typename T>
 enable_if_t<sizeof(T) == 8, bool> VariantData::setFloat(
     T value, ResourceManager* resources) {
-  ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
-  (void)resources;                                 // silence warning
+  ARDUINOJSON_ASSERT(type_ == VariantType::Null);
+  (void)resources;
 
   float valueAsFloat = static_cast<float>(value);
 
@@ -100,8 +100,8 @@ enable_if_t<sizeof(T) == 8, bool> VariantData::setFloat(
 template <typename T>
 enable_if_t<is_signed<T>::value, bool> VariantData::setInteger(
     T value, ResourceManager* resources) {
-  ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
-  (void)resources;                                 // silence warning
+  ARDUINOJSON_ASSERT(type_ == VariantType::Null);
+  (void)resources;
 
   if (canConvertNumber<int32_t>(value)) {
     type_ = VariantType::Int32;
@@ -123,8 +123,8 @@ enable_if_t<is_signed<T>::value, bool> VariantData::setInteger(
 template <typename T>
 enable_if_t<is_unsigned<T>::value, bool> VariantData::setInteger(
     T value, ResourceManager* resources) {
-  ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
-  (void)resources;                                 // silence warning
+  ARDUINOJSON_ASSERT(type_ == VariantType::Null);
+  (void)resources;
 
   if (canConvertNumber<uint32_t>(value)) {
     type_ = VariantType::Uint32;

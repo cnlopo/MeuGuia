@@ -31,7 +31,7 @@ TEST_CASE("deserializeMsgPack(const std::string&)") {
     std::string input("\x91\xA5hello");
 
     DeserializationError err = deserializeMsgPack(doc, input);
-    input[2] = 'X';  // alter the string tomake sure we made a copy
+    input[2] = 'X';
 
     JsonArray array = doc.as<JsonArray>();
     REQUIRE(err == DeserializationError::Ok);

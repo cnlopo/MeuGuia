@@ -32,7 +32,7 @@ TEST_CASE("TextFormatter::writeString()") {
   }
 
   SECTION("Solidus") {
-    check("/", "\"/\"");  // but the JSON format allows \/
+    check("/", "\"/\"");
   }
 
   SECTION("Backspace") {

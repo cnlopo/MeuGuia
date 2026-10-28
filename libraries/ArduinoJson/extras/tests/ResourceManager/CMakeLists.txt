@@ -14,7 +14,7 @@ add_executable(ResourceManagerTests
 )
 
 add_compile_definitions(ResourceManagerTests
-	ARDUINOJSON_SLOT_ID_SIZE=1 # require less RAM for overflow tests
+	ARDUINOJSON_SLOT_ID_SIZE=1
 	ARDUINOJSON_POOL_CAPACITY=16
 )
 

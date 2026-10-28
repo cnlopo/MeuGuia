@@ -12,7 +12,7 @@ add_executable(IntegrationTests
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6)
 	target_compile_options(IntegrationTests
 		PUBLIC
-			-fsingle-precision-constant # issue 544
+			-fsingle-precision-constant
 	)
 endif()
 

@@ -2,7 +2,7 @@
 // Copyright © 2014-2026, Benoit BLANCHON
 // MIT License
 
-#define ARDUINOJSON_SLOT_ID_SIZE 4  // required to reach 65536 elements
+#define ARDUINOJSON_SLOT_ID_SIZE 4
 
 #include <ArduinoJson.h>
 #include <catch.hpp>

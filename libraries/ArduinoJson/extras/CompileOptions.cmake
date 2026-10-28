@@ -36,14 +36,13 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9) AND(NOT ${COVERAGE}))
 		add_compile_options(-g -Og)
-	else() # GCC 4.8
+	else()
 		add_compile_options(
 			-g
-			-O0 # GCC 4.8 doesn't support -Og
-			-Wno-shadow  # allow the same name for a function parameter and a member functions
-			-Wp,-w  # Disable preprocessing warnings (see below)
+			-O0
+			-Wno-shadow
+			-Wp,-w
 		)
-		# GCC 4.8 doesn't support __has_include, so we need to help him
 		add_definitions(
 			-DARDUINOJSON_ENABLE_STD_STRING=1
 			-DARDUINOJSON_ENABLE_STD_STREAM=1
@@ -52,12 +51,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 	add_compile_options(
 		-Wstrict-null-sentinel
-		-Wno-vla # Allow VLA in tests
+		-Wno-vla
 	)
 	add_definitions(-DHAS_VARIABLE_LENGTH_ARRAY)
 
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.5)
-		add_compile_options(-Wlogical-op) # the flag exists in 4.4 but is buggy
+		add_compile_options(-Wlogical-op)
 	endif()
 
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.6)
@@ -69,7 +68,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	add_compile_options(
 		-Wc++11-compat
 		-Wdeprecated-register
-		-Wno-vla-extension # Allow VLA in tests
+		-Wno-vla-extension
 	)
 	add_definitions(
 		-DHAS_VARIABLE_LENGTH_ARRAY
@@ -99,14 +98,12 @@ endif()
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_compile_options(
-		/W4 # Set warning level
-		/WX # Treats all compiler warnings as errors.
-		/Zc:__cplusplus # Enable updated __cplusplus macro
+		/W4
+		/WX
+		/Zc:__cplusplus
 	)
 endif()
 
 if(MINGW)
-	# Static link on MinGW to avoid linking with the wrong DLLs when multiple
-	# versions are installed.
 	add_link_options(-static)
 endif()

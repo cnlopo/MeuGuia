@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 link_libraries(ArduinoJson)
 
-# Failing builds should only link with ArduinoJson, not catch
 add_subdirectory(FailingBuilds)
 
 add_subdirectory(catch)

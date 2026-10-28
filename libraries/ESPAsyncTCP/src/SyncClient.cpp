@@ -32,12 +32,6 @@
 #define SYNC_CLIENT_DEBUG(...) do { (void)0;} while(false)
 #endif
 
-/*
-  Without LWIP_NETIF_TX_SINGLE_PBUF, all tcp_writes default to "no copy".
-  Referenced data must be preserved and free-ed from the specified tcp_sent()
-  callback. Alternative, tcp_writes need to use the TCP_WRITE_FLAG_COPY
-  attribute.
-*/
 static_assert(LWIP_NETIF_TX_SINGLE_PBUF, "Required, tcp_write() must always copy.");
 
 SyncClient::SyncClient(size_t txBufLen)
@@ -164,30 +158,15 @@ int SyncClient::connect(const char *host, uint16_t port){
   }
   return 0;
 }
-//#define SYNCCLIENT_NEW_OPERATOR_EQUAL
 #ifdef SYNCCLIENT_NEW_OPERATOR_EQUAL
-/*
-  New behavior for operator=
-
-  Allow for the object to be placed on a queue and transfered to a new container
-  with buffers still in tact. Avoiding receive data drops. Transfers rx and tx
-  buffers. Supports return by value.
-
-  Note, this is optional, the old behavior is the default.
-
-*/
 SyncClient & SyncClient::operator=(const SyncClient &other){
   int *rhsref = other._ref;
-  ++*rhsref; // Just in case the left and right side are the same object with different containers
+  ++*rhsref;
   if (0 == unref())
     _release();
   _ref = other._ref;
   ref();
   --*rhsref;
-  // Why do I not test _tx_buffer for != NULL and free?
-  // I allow for the lh target container, to be a copy of an active
-  // connection. Thus we are just reusing the container.
-  // The above unref() handles releaseing the previous client of the container.
   _tx_buffer_size = other._tx_buffer_size;
   _tx_buffer = other._tx_buffer;
   _client = other._client;
@@ -199,8 +178,7 @@ SyncClient & SyncClient::operator=(const SyncClient &other){
     _attachCallbacks();
   return *this;
 }
-#else   // ! SYNCCLIENT_NEW_OPERATOR_EQUAL
-// This is the origianl logic with null checks
+#else
 SyncClient & SyncClient::operator=(const SyncClient &other){
   if(_client != NULL){
     _client->abort();
@@ -284,11 +262,6 @@ void SyncClient::_onData(void *data, size_t len){
       p->next = b;
     }
   } else {
-    // We ran out of memory. This fail causes lost receive data.
-    // The connection should be closed in a manner that conveys something
-    // bad/abnormal has happened to the connection. Hence, we abort the
-    // connection to avoid possible data corruption.
-    // Note, callbacks maybe called.
     _client->abort();
   }
 }

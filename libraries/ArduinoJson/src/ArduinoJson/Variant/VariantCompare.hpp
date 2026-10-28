@@ -20,7 +20,7 @@ struct Comparer;
 
 template <typename T>
 struct Comparer<T, enable_if_t<IsString<T>::value>> : ComparerBase {
-  T rhs;  // TODO: store adapted string?
+  T rhs;
 
   explicit Comparer(T value) : rhs(value) {}
 

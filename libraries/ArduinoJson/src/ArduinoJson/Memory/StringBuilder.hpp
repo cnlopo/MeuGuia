@@ -39,9 +39,9 @@ class StringBuilder {
     StringNode* node = resources_->getString(adaptString(p, size_));
     if (!node) {
       node = resources_->resizeString(node_, size_);
-      ARDUINOJSON_ASSERT(node != nullptr);  // realloc to smaller can't fail
+      ARDUINOJSON_ASSERT(node != nullptr);
       resources_->saveString(node);
-      node_ = nullptr;  // next time we need a new string
+      node_ = nullptr;
     } else {
       node->references++;
     }
@@ -54,7 +54,7 @@ class StringBuilder {
   }
 
   void append(const char* s, size_t n) {
-    while (n-- > 0)  // TODO: memcpy
+    while (n-- > 0)
       append(*s++);
   }
 

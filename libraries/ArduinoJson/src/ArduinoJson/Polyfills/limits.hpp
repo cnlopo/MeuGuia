@@ -13,7 +13,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// Differs from standard because we can't use the symbols "min" and "max"
 template <typename T, typename Enable = void>
 struct numeric_limits;
 

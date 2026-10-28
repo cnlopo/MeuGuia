@@ -7,7 +7,6 @@
 #ifdef ARDUINO
 #  include <Arduino.h>
 #else
-// Allow using PROGMEM outside of Arduino (issue #1903)
 class __FlashStringHelper;
 #  include <avr/pgmspace.h>
 #endif
@@ -17,8 +16,6 @@ class __FlashStringHelper;
 #include <ArduinoJson/Polyfills/assert.hpp>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
-// Wraps a const char* so that the our functions are picked only if the
-// originals are missing
 struct pgm_p {
   pgm_p(const void* p) : address(reinterpret_cast<const char*>(p)) {}
   const char* address;
@@ -49,7 +46,7 @@ inline int strncmp_P(const char* a, ArduinoJson::detail::pgm_p b, size_t n) {
       return -1;
     if (c1 > c2)
       return 1;
-    if (c1 == 0 /* and c2 as well */)
+    if (c1 == 0 )
       return 0;
   }
   return 0;
@@ -69,7 +66,7 @@ inline int strcmp_P(const char* a, ArduinoJson::detail::pgm_p b) {
       return -1;
     if (c1 > c2)
       return 1;
-    if (c1 == 0 /* and c2 as well */)
+    if (c1 == 0 )
       return 0;
   }
 }

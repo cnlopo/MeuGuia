@@ -6,11 +6,10 @@
 
 #include <ArduinoJson/Namespace.hpp>
 
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that returns the highest value
 template <size_t X, size_t Y, bool MaxIsX = (X > Y)>
 struct Max {};
 

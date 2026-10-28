@@ -87,7 +87,7 @@ TEST_CASE("JsonDocument::set()") {
                          });
   }
 
-  SECTION("Flash tiny string") {  // issue #2170
+  SECTION("Flash tiny string") {
     doc.set(F("abc"));
 
     REQUIRE(doc.as<const char*>() == "abc"_s);

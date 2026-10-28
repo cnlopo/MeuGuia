@@ -9,7 +9,7 @@ using namespace std;
 TEST_CASE("std::swap") {
   SECTION("JsonDocument*") {
     JsonDocument *p1, *p2;
-    swap(p1, p2);  // issue #1678
+    swap(p1, p2);
   }
 
   SECTION("JsonDocument") {

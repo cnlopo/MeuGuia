@@ -226,7 +226,7 @@ TEST_CASE("copyArray()") {
     CHECK(3 == result);
     CHECK("a12345"_s == destination[0]);
     CHECK("b123456"_s == destination[1]);
-    CHECK("c123456"_s == destination[2]);  // truncated
+    CHECK("c123456"_s == destination[2]);
     CHECK(std::string("") == destination[3]);
   }
 

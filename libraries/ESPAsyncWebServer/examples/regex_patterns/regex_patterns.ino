@@ -1,22 +1,3 @@
-//
-// A simple server implementation with regex routes:
-//  * serve static messages
-//  * read GET and POST parameters
-//  * handle missing pages / 404s
-//
-
-// Add buildflag ASYNCWEBSERVER_REGEX to enable the regex support
-
-// For platformio: platformio.ini:
-//  build_flags = 
-//      -DASYNCWEBSERVER_REGEX
-
-// For arduino IDE: create/update platform.local.txt
-// Windows: C:\Users\(username)\AppData\Local\Arduino15\packages\espxxxx\hardware\espxxxx\{version}\platform.local.txt
-// Linux: ~/.arduino15/packages/espxxxx/hardware/espxxxx/{version}/platform.local.txt
-//
-// compiler.cpp.extra_flags=-DASYNCWEBSERVER_REGEX=1
-
 #include <Arduino.h>
 #ifdef ESP32
 #include <WiFi.h>
@@ -55,13 +36,11 @@ void setup() {
         request->send(200, "text/plain", "Hello, world");
     });
 
-    // Send a GET request to <IP>/sensor/<number>
     server.on("^\\/sensor\\/([0-9]+)$", HTTP_GET, [] (AsyncWebServerRequest *request) {
         String sensorNumber = request->pathArg(0);
         request->send(200, "text/plain", "Hello, sensor: " + sensorNumber);
     });
 	
-	// Send a GET request to <IP>/sensor/<number>/action/<action>
     server.on("^\\/sensor\\/([0-9]+)\\/action\\/([a-zA-Z0-9]+)$", HTTP_GET, [] (AsyncWebServerRequest *request) {
         String sensorNumber = request->pathArg(0);
         String action = request->pathArg(1);

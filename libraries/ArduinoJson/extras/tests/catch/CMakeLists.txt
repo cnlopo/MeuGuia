@@ -16,6 +16,5 @@ target_include_directories(catch
 )
 
 if(MINGW)
-	# prevent "too many sections (32837)" with MinGW
 	target_compile_options(catch PRIVATE -Wa,-mbig-obj)
 endif()

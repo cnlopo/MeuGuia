@@ -5,9 +5,6 @@
 #include <ArduinoJson.h>
 #include <catch.hpp>
 
-// Most code is already covered by arithmeticCompare.cpp.
-// Here, we're just filling the holes
-
 TEST_CASE("Compare JsonVariant with value") {
   JsonDocument doc;
   JsonVariant a = doc.add<JsonVariant>();

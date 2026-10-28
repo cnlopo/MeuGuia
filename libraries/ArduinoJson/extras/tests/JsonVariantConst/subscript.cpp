@@ -32,7 +32,7 @@ TEST_CASE("JsonVariantConst::operator[]") {
     SECTION("int") {
       REQUIRE("A"_s == var[0]);
       REQUIRE("B"_s == var[1]);
-      REQUIRE("A"_s == var[static_cast<unsigned char>(0)]);  // issue #381
+      REQUIRE("A"_s == var[static_cast<unsigned char>(0)]);
       REQUIRE(var[666].isNull());
       REQUIRE(var[3].isNull());
     }

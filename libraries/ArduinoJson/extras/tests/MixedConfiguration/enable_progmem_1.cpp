@@ -50,7 +50,7 @@ TEST_CASE("Flash strings") {
   }
 }
 
-TEST_CASE("parseNumber()") {  // tables are in Flash
+TEST_CASE("parseNumber()") {
   using ArduinoJson::detail::parseNumber;
 
   CHECK(parseNumber<float>("1") == 1.f);

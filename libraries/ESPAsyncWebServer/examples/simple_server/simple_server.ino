@@ -1,10 +1,3 @@
-//
-// A simple server implementation showing how to:
-//  * serve static messages
-//  * read GET and POST parameters
-//  * handle missing pages / 404s
-//
-
 #include <Arduino.h>
 #ifdef ESP32
 #include <WiFi.h>
@@ -43,7 +36,6 @@ void setup() {
         request->send(200, "text/plain", "Hello, world");
     });
 
-    // Send a GET request to <IP>/get?message=<message>
     server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
         String message;
         if (request->hasParam(PARAM_MESSAGE)) {
@@ -54,7 +46,6 @@ void setup() {
         request->send(200, "text/plain", "Hello, GET: " + message);
     });
 
-    // Send a POST request to <IP>/post with a form field message set to <message>
     server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request){
         String message;
         if (request->hasParam(PARAM_MESSAGE, true)) {

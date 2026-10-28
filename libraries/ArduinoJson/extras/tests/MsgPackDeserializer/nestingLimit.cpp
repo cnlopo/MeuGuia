@@ -17,17 +17,17 @@ TEST_CASE("JsonDeserializer nesting") {
   SECTION("Input = const char*") {
     SECTION("limit = 0") {
       DeserializationOption::NestingLimit nesting(0);
-      SHOULD_WORK(deserializeMsgPack(doc, "\xA1H", nesting));  // "H"
-      SHOULD_FAIL(deserializeMsgPack(doc, "\x90", nesting));   // []
-      SHOULD_FAIL(deserializeMsgPack(doc, "\x80", nesting));   // {}
+      SHOULD_WORK(deserializeMsgPack(doc, "\xA1H", nesting));
+      SHOULD_FAIL(deserializeMsgPack(doc, "\x90", nesting));
+      SHOULD_FAIL(deserializeMsgPack(doc, "\x80", nesting));
     }
 
     SECTION("limit = 1") {
       DeserializationOption::NestingLimit nesting(1);
-      SHOULD_WORK(deserializeMsgPack(doc, "\x90", nesting));           // {}
-      SHOULD_WORK(deserializeMsgPack(doc, "\x80", nesting));           // []
-      SHOULD_FAIL(deserializeMsgPack(doc, "\x81\xA1H\x80", nesting));  // {H:{}}
-      SHOULD_FAIL(deserializeMsgPack(doc, "\x91\x90", nesting));       // [[]]
+      SHOULD_WORK(deserializeMsgPack(doc, "\x90", nesting));
+      SHOULD_WORK(deserializeMsgPack(doc, "\x80", nesting));
+      SHOULD_FAIL(deserializeMsgPack(doc, "\x81\xA1H\x80", nesting));
+      SHOULD_FAIL(deserializeMsgPack(doc, "\x91\x90", nesting));
     }
   }
 
@@ -70,16 +70,16 @@ TEST_CASE("JsonDeserializer nesting") {
   SECTION("Input = std::istream") {
     SECTION("limit = 0") {
       DeserializationOption::NestingLimit nesting(0);
-      std::istringstream good("\xA1H");  // "H"
-      std::istringstream bad("\x90");    // []
+      std::istringstream good("\xA1H");
+      std::istringstream bad("\x90");
       SHOULD_WORK(deserializeMsgPack(doc, good, nesting));
       SHOULD_FAIL(deserializeMsgPack(doc, bad, nesting));
     }
 
     SECTION("limit = 1") {
       DeserializationOption::NestingLimit nesting(1);
-      std::istringstream good("\x90");     // []
-      std::istringstream bad("\x91\x90");  // [[]]
+      std::istringstream good("\x90");
+      std::istringstream bad("\x91\x90");
       SHOULD_WORK(deserializeMsgPack(doc, good, nesting));
       SHOULD_FAIL(deserializeMsgPack(doc, bad, nesting));
     }

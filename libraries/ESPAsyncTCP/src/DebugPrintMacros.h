@@ -1,16 +1,7 @@
 #ifndef _DEBUG_PRINT_MACROS_H
 #define _DEBUG_PRINT_MACROS_H
-// Some customizable print macros to suite the debug needs de jour.
 
-// Debug macros
-// #include <pgmspace.h>
-// https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
-// This value is resolved at compile time.
 #define _FILENAME_ strrchr("/" __FILE__, '/')
-
-// #define DEBUG_ESP_ASYNC_TCP 1
-// #define DEBUG_ESP_TCP_SSL 1
-// #define DEBUG_ESP_PORT Serial
 
 #if defined(DEBUG_ESP_PORT) && !defined(DEBUG_TIME_STAMP_FMT)
 #define DEBUG_TIME_STAMP_FMT "%06u.%03u "
@@ -93,4 +84,4 @@ inline struct _DEBUG_TIME_STAMP debugTimeStamp(void) {
 #define TCP_SSL_DEBUG( format, ...) DEBUG_GENERIC_P("[TCP_SSL]", format, ##__VA_ARGS__)
 #endif
 
-#endif //_DEBUG_PRINT_MACROS_H
+#endif

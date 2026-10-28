@@ -1,28 +1,17 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
-/*
-   This sample code tracks satellite elevations using TinyGPSCustom objects.
-
-   Satellite numbers and elevations are not normally tracked by TinyGPSPlus, but 
-   by using TinyGPSCustom we get around this.
-
-   It requires the use of SoftwareSerial and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(RX) and 3(TX).
-*/
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 static const int MAX_SATELLITES = 40;
 static const int PAGE_LENGTH = 40;
 
-// The TinyGPSPlus object
 TinyGPSPlus gps;
 
-// The serial connection to the GPS device
 SoftwareSerial ss(RXPin, TXPin);
 
-TinyGPSCustom totalGPGSVMessages(gps, "GPGSV", 1); // $GPGSV sentence, first element
-TinyGPSCustom messageNumber(gps, "GPGSV", 2);      // $GPGSV sentence, second element
-TinyGPSCustom satNumber[4]; // to be initialized later
+TinyGPSCustom totalGPGSVMessages(gps, "GPGSV", 1);
+TinyGPSCustom messageNumber(gps, "GPGSV", 2);
+TinyGPSCustom satNumber[4];
 TinyGPSCustom elevation[4];
 bool anyChanges = false;
 unsigned long linecount = 0;
@@ -44,17 +33,15 @@ void setup()
   Serial.println(F("by Mikal Hart"));
   Serial.println();
   
-  // Initialize all the uninitialized TinyGPSCustom objects
   for (int i=0; i<4; ++i)
   {
-    satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
-    elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
+    satNumber[i].begin(gps, "GPGSV", 4 + 4 * i);
+    elevation[i].begin(gps, "GPGSV", 5 + 4 * i);
   }
 }
 
 void loop()
 {
-  // Dispatch incoming characters
   if (ss.available() > 0)
   {
     gps.encode(ss.read());

@@ -44,7 +44,7 @@
 #define ASYNCWEBSERVER_REGEX_ATTRIBUTE __attribute__((warning("ASYNCWEBSERVER_REGEX not defined")))
 #endif
 
-#define DEBUGF(...) //Serial.printf(__VA_ARGS__)
+#define DEBUGF(...)
 
 class AsyncWebServer;
 class AsyncWebServerRequest;
@@ -70,15 +70,10 @@ typedef enum {
 } WebRequestMethod;
 #endif
 
-//if this value is returned when asked for data, packet will not be sent and you will be asked for data again
 #define RESPONSE_TRY_AGAIN 0xFFFFFFFF
 
 typedef uint8_t WebRequestMethodComposite;
 typedef std::function<void(void)> ArDisconnectHandler;
-
-/*
- * PARAMETER :: Chainable object to hold GET/POST and FILE parameters
- * */
 
 class AsyncWebParameter {
   private:
@@ -97,10 +92,6 @@ class AsyncWebParameter {
     bool isPost() const { return _isForm; }
     bool isFile() const { return _isFile; }
 };
-
-/*
- * HEADER :: Chainable object to hold the headers
- * */
 
 class AsyncWebHeader {
   private:
@@ -121,10 +112,6 @@ class AsyncWebHeader {
     const String& value() const { return _value; }
     String toString() const { return String(_name+": "+_value+"\r\n"); }
 };
-
-/*
- * REQUEST :: Each incoming Client is wrapped inside a Request and both live together until disconnect
- * */
 
 typedef enum { RCT_NOT_USED = -1, RCT_DEFAULT = 0, RCT_HTTP, RCT_WS, RCT_EVENT, RCT_MAX } RequestedConnectionType;
 
@@ -221,9 +208,6 @@ class AsyncWebServerRequest {
     bool isExpectedRequestedConnType(RequestedConnectionType erct1, RequestedConnectionType erct2 = RCT_NOT_USED, RequestedConnectionType erct3 = RCT_NOT_USED);
     void onDisconnect (ArDisconnectHandler fn);
 
-    //hash is the string representation of:
-    // base64(user:pass) for basic or
-    // user:realm:md5(user:realm:pass) for digest
     bool authenticate(const char * hash);
     bool authenticate(const char * username, const char * password, const char * realm = NULL, bool passwordIsHash = false);
     void requestAuthentication(const char * realm = NULL, bool isDigest = true);
@@ -253,15 +237,15 @@ class AsyncWebServerRequest {
     AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback=nullptr);
     AsyncWebServerResponse *beginResponse_P(int code, const String& contentType, PGM_P content, AwsTemplateProcessor callback=nullptr);
 
-    size_t headers() const;                     // get header count
-    bool hasHeader(const String& name) const;   // check if header exists
-    bool hasHeader(const __FlashStringHelper * data) const;   // check if header exists
+    size_t headers() const;
+    bool hasHeader(const String& name) const;
+    bool hasHeader(const __FlashStringHelper * data) const;
 
     AsyncWebHeader* getHeader(const String& name) const;
     AsyncWebHeader* getHeader(const __FlashStringHelper * data) const;
     AsyncWebHeader* getHeader(size_t num) const;
 
-    size_t params() const;                      // get arguments count
+    size_t params() const;
     bool hasParam(const String& name, bool post=false, bool file=false) const;
     bool hasParam(const __FlashStringHelper * data, bool post=false, bool file=false) const;
 
@@ -269,36 +253,28 @@ class AsyncWebServerRequest {
     AsyncWebParameter* getParam(const __FlashStringHelper * data, bool post, bool file) const; 
     AsyncWebParameter* getParam(size_t num) const;
 
-    size_t args() const { return params(); }     // get arguments count
-    const String& arg(const String& name) const; // get request argument value by name
-    const String& arg(const __FlashStringHelper * data) const; // get request argument value by F(name)    
-    const String& arg(size_t i) const;           // get request argument value by number
-    const String& argName(size_t i) const;       // get request argument name by number
-    bool hasArg(const char* name) const;         // check if argument exists
-    bool hasArg(const __FlashStringHelper * data) const;         // check if F(argument) exists
+    size_t args() const { return params(); }
+    const String& arg(const String& name) const;
+    const String& arg(const __FlashStringHelper * data) const;
+    const String& arg(size_t i) const;
+    const String& argName(size_t i) const;
+    bool hasArg(const char* name) const;
+    bool hasArg(const __FlashStringHelper * data) const;
 
     const String& ASYNCWEBSERVER_REGEX_ATTRIBUTE pathArg(size_t i) const;
 
-    const String& header(const char* name) const;// get request header value by name
-    const String& header(const __FlashStringHelper * data) const;// get request header value by F(name)    
-    const String& header(size_t i) const;        // get request header value by number
-    const String& headerName(size_t i) const;    // get request header name by number
+    const String& header(const char* name) const;
+    const String& header(const __FlashStringHelper * data) const;
+    const String& header(size_t i) const;
+    const String& headerName(size_t i) const;
     String urlDecode(const String& text) const;
 };
-
-/*
- * FILTER :: Callback to filter AsyncWebRewrite and AsyncWebHandler (done by the Server)
- * */
 
 typedef std::function<bool(AsyncWebServerRequest *request)> ArRequestFilterFunction;
 
 bool ON_STA_FILTER(AsyncWebServerRequest *request);
 
 bool ON_AP_FILTER(AsyncWebServerRequest *request);
-
-/*
- * REWRITE :: One instance can be handle any Request (done by the Server)
- * */
 
 class AsyncWebRewrite {
   protected:
@@ -323,10 +299,6 @@ class AsyncWebRewrite {
     virtual bool match(AsyncWebServerRequest *request) { return from() == request->url() && filter(request); }
 };
 
-/*
- * HANDLER :: One instance can be attached to any Request (done by the Server)
- * */
-
 class AsyncWebHandler {
   protected:
     ArRequestFilterFunction _filter;
@@ -346,10 +318,6 @@ class AsyncWebHandler {
     virtual void handleBody(AsyncWebServerRequest *request __attribute__((unused)), uint8_t *data __attribute__((unused)), size_t len __attribute__((unused)), size_t index __attribute__((unused)), size_t total __attribute__((unused))){}
     virtual bool isRequestHandlerTrivial(){return true;}
 };
-
-/*
- * RESPONSE :: One instance is created for each Request (attached by the Handler)
- * */
 
 typedef enum {
   RESPONSE_SETUP, RESPONSE_HEADERS, RESPONSE_CONTENT, RESPONSE_WAIT_ACK, RESPONSE_END, RESPONSE_FAILED
@@ -385,10 +353,6 @@ class AsyncWebServerResponse {
     virtual void _respond(AsyncWebServerRequest *request);
     virtual size_t _ack(AsyncWebServerRequest *request, size_t len, uint32_t time);
 };
-
-/*
- * SERVER :: One instance
- * */
 
 typedef std::function<void(AsyncWebServerRequest *request)> ArRequestHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final)> ArUploadHandlerFunction;
@@ -427,11 +391,11 @@ class AsyncWebServer {
 
     AsyncStaticWebHandler& serveStatic(const char* uri, fs::FS& fs, const char* path, const char* cache_control = NULL);
 
-    void onNotFound(ArRequestHandlerFunction fn);  //called when handler is not assigned
-    void onFileUpload(ArUploadHandlerFunction fn); //handle file uploads
-    void onRequestBody(ArBodyHandlerFunction fn); //handle posts with plain body content (JSON often transmitted this way as a request)
+    void onNotFound(ArRequestHandlerFunction fn);
+    void onFileUpload(ArUploadHandlerFunction fn);
+    void onRequestBody(ArBodyHandlerFunction fn);
 
-    void reset(); //remove all writers and handlers, with onNotFound/onFileUpload/onRequestBody 
+    void reset();
   
     void _handleDisconnect(AsyncWebServerRequest *request);
     void _attachHandler(AsyncWebServerRequest *request);
@@ -468,4 +432,4 @@ public:
 #include "AsyncWebSocket.h"
 #include "AsyncEventSource.h"
 
-#endif /* _AsyncWebServer_H_ */
+#endif

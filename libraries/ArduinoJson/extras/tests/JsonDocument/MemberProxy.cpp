@@ -149,9 +149,8 @@ TEST_CASE("MemberProxy::operator|()") {
   SECTION("Issue #1411") {
     doc["sensor"] = "gps";
 
-    const char* test = "test";  // <- the literal must be captured in a variable
-                                // to trigger the bug
-    const char* sensor = doc["sensor"] | test;  // "gps"
+    const char* test = "test";
+    const char* sensor = doc["sensor"] | test;
 
     REQUIRE(sensor == "gps"_s);
   }
@@ -231,7 +230,7 @@ TEST_CASE("MemberProxy::set()") {
     REQUIRE(doc.as<std::string>() == "{\"hello\":\"world\"}");
   }
 
-  SECTION("set(char[])") {  // issue #1191
+  SECTION("set(char[])") {
     char s[] = "world";
     mp.set(s);
     strcpy(s, "!!!!!");
@@ -401,7 +400,6 @@ TEST_CASE("MemberProxy under memory constraints") {
   SECTION("value slot allocation fails") {
     timebomb.setCountdown(1);
 
-    // fill the pool entirely, but leave one slot for the key
     doc["foo"][ARDUINOJSON_POOL_CAPACITY - 4] = 1;
     REQUIRE(doc.overflowed() == false);
 

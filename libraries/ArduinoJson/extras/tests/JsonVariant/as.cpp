@@ -10,7 +10,7 @@
 
 namespace my {
 using ArduinoJson::detail::isinf;
-}  // namespace my
+}
 
 enum MY_ENUM { ONE = 1, TWO = 2 };
 

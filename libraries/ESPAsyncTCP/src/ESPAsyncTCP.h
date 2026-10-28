@@ -38,8 +38,8 @@ class AsyncServer;
 class ACErrorTracker;
 
 #define ASYNC_MAX_ACK_TIME 5000
-#define ASYNC_WRITE_FLAG_COPY 0x01 //will allocate new buffer to hold the data while sending (else will hold reference to the data given)
-#define ASYNC_WRITE_FLAG_MORE 0x02 //will not send PSH flag, meaning that there should be more data to be sent before the application should react.
+#define ASYNC_WRITE_FLAG_COPY 0x01
+#define ASYNC_WRITE_FLAG_MORE 0x02
 
 struct tcp_pcb;
 struct ip_addr;
@@ -60,16 +60,13 @@ typedef std::function<void(void*, size_t event)> AsNotifyHandler;
 
 enum error_events {
   EE_OK = 0,
-  EE_ABORTED,       // Callback or foreground aborted connections
-  EE_ERROR_CB,      // Stack initiated aborts via error Callbacks.
+  EE_ABORTED,
+  EE_ERROR_CB,
   EE_CONNECTED_CB,
   EE_RECV_CB,
   EE_ACCEPT_CB,
   EE_MAX
 };
-// DEBUG_MORE is for gathering more information on which CBs close events are
-// occuring and count.
-// #define DEBUG_MORE 1
 class ACErrorTracker {
   private:
     AsyncClient *_client;
@@ -207,12 +204,12 @@ class AsyncClient {
     void abort();
     bool free();
 
-    bool canSend();//ack is not pending
+    bool canSend();
     size_t space();
-    size_t add(const char* data, size_t size, uint8_t apiflags=0);//add for sending
-    bool send();//send all data added with the method above
-    size_t ack(size_t len); //ack data that you have not acked using the method below
-    void ackLater(){ _ack_pcb = false; } //will not ack the current packet. Call from onData
+    size_t add(const char* data, size_t size, uint8_t apiflags=0);
+    bool send();
+    size_t ack(size_t len);
+    void ackLater(){ _ack_pcb = false; }
     bool isRecvPush(){ return !!(_recv_pbuf_flags & PBUF_FLAG_PUSH); }
 #if DEBUG_ESP_ASYNC_TCP
     size_t getConnectionId(void) const { return _errorTracker->getConnectionId();}
@@ -222,20 +219,20 @@ class AsyncClient {
 #endif
 
     size_t write(const char* data);
-    size_t write(const char* data, size_t size, uint8_t apiflags=0); //only when canSend() == true
+    size_t write(const char* data, size_t size, uint8_t apiflags=0);
 
     uint8_t state();
     bool connecting();
     bool connected();
     bool disconnecting();
     bool disconnected();
-    bool freeable();//disconnected or disconnecting
+    bool freeable();
 
     uint16_t getMss();
     uint32_t getRxTimeout();
-    void setRxTimeout(uint32_t timeout);//no RX data timeout for the connection in seconds
+    void setRxTimeout(uint32_t timeout);
     uint32_t getAckTimeout();
-    void setAckTimeout(uint32_t timeout);//no ACK timeout for the last sent packet in milliseconds
+    void setAckTimeout(uint32_t timeout);
     void setNoDelay(bool nodelay);
     bool getNoDelay();
     uint32_t getRemoteAddress();
@@ -248,14 +245,14 @@ class AsyncClient {
     IPAddress localIP();
     uint16_t  localPort();
 
-    void onConnect(AcConnectHandler cb, void* arg = 0);     //on successful connect
-    void onDisconnect(AcConnectHandler cb, void* arg = 0);  //disconnected
-    void onAck(AcAckHandler cb, void* arg = 0);             //ack received
-    void onError(AcErrorHandler cb, void* arg = 0);         //unsuccessful connect or error
-    void onData(AcDataHandler cb, void* arg = 0);           //data received (called if onPacket is not used)
-    void onPacket(AcPacketHandler cb, void* arg = 0);       //data received
-    void onTimeout(AcTimeoutHandler cb, void* arg = 0);     //ack timeout
-    void onPoll(AcConnectHandler cb, void* arg = 0);        //every 125ms when connected
+    void onConnect(AcConnectHandler cb, void* arg = 0);
+    void onDisconnect(AcConnectHandler cb, void* arg = 0);
+    void onAck(AcAckHandler cb, void* arg = 0);
+    void onError(AcErrorHandler cb, void* arg = 0);
+    void onData(AcDataHandler cb, void* arg = 0);
+    void onPacket(AcPacketHandler cb, void* arg = 0);
+    void onTimeout(AcTimeoutHandler cb, void* arg = 0);
+    void onPoll(AcConnectHandler cb, void* arg = 0);
     void ackPacket(struct pbuf * pb);
 
     const char * errorToString(err_t error);
@@ -324,4 +321,4 @@ class AsyncServer {
 };
 
 
-#endif /* ASYNCTCP_H_ */
+#endif

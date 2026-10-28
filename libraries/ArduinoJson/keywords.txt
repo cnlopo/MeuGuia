@@ -1,4 +1,3 @@
-# Free functions
 deserializeJson	KEYWORD2
 deserializeMsgPack	KEYWORD2
 serialized	KEYWORD2
@@ -9,14 +8,12 @@ measureJson	KEYWORD2
 measureJsonPretty	KEYWORD2
 measureMsgPack	KEYWORD2
 
-# Methods
 add	KEYWORD2
 as	KEYWORD2
 get	KEYWORD2
 set	KEYWORD2
 to	KEYWORD2
 
-# Type names
 DeserializationError	KEYWORD1	DATA_TYPE
 JsonDocument	KEYWORD1	DATA_TYPE
 JsonArray	KEYWORD1	DATA_TYPE

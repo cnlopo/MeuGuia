@@ -7,7 +7,6 @@
 #include <iostream>
 #include <string>
 
-// All cores
 #define bit()
 #define constrain()
 #define DEFAULT
@@ -35,11 +34,9 @@
 #define cbi()
 #define sbi()
 
-// ESP8266
 #define _max()
 #define _min()
 
-// Realtek Ameba
 #define isdigit(c) (((c) >= '0') && ((c) <= '9'))
 #define isprint(c)
 #define isxdigit(c)
@@ -48,20 +45,15 @@
 #define islower(c)
 #define isalpha(c)
 
-// issue #839
 #define BLOCKSIZE
 #define CAPACITY
 
-// issue #1905
 #define _current
 
-// issue #1914
 #define V7 7
 
-// STM32, Mbed, Particle
 #define A0 16
 #define A1 17
 #define A2 18
 
-// catch.hpp mutes several warnings, this file also allows to detect them
 #include "ArduinoJson.h"

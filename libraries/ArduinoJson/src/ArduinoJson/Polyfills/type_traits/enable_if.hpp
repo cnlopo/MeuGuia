@@ -8,7 +8,6 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// A meta-function that return the type T if Condition is true.
 template <bool Condition, typename T = void>
 struct enable_if {};
 

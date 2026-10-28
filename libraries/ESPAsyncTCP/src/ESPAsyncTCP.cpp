@@ -82,12 +82,6 @@ extern "C"{
 }
 #include <tcp_axtls.h>
 
-/*
-  Async Client Error Return Tracker
-*/
-// Assumption: callbacks are never called with err == ERR_ABRT; however,
-// they may return ERR_ABRT.
-
 ACErrorTracker::ACErrorTracker(AsyncClient *c):
     _client(c)
   , _close_error(ERR_OK)
@@ -99,10 +93,6 @@ ACErrorTracker::ACErrorTracker(AsyncClient *c):
 {}
 
 #ifdef DEBUG_MORE
-/**
- * This is not necessary, but a start at gathering some statistics on
- * errored out connections. Used from AsyncServer.
- */
 void ACErrorTracker::onErrorEvent(AsNotifyHandler cb, void *arg) {
   _error_event_cb = cb;
   _error_event_cb_arg = arg;
@@ -115,11 +105,6 @@ void ACErrorTracker::setCloseError(err_t e) {
   if(_errored == EE_OK)
     _close_error = e;
 }
-/**
- * Called mainly by callback routines, called when err is not ERR_OK.
- * This prevents the possiblity of aborting an already errored out
- * connection.
- */
 void ACErrorTracker::setErrored(size_t errorEvent){
   if(EE_OK == _errored)
     _errored = errorEvent;
@@ -128,11 +113,6 @@ void ACErrorTracker::setErrored(size_t errorEvent){
     _error_event_cb(_error_event_cb_arg, errorEvent);
 #endif
 }
-/**
- * Used by callback functions only. Used for proper ERR_ABRT return value
- * reporting. ERR_ABRT is only reported/returned once; thereafter ERR_OK
- * is always returned.
- */
 err_t ACErrorTracker::getCallbackCloseError(void){
   if (EE_OK != _errored)
     return ERR_OK;
@@ -141,9 +121,6 @@ err_t ACErrorTracker::getCallbackCloseError(void){
   return _close_error;
 }
 
-/*
-  Async TCP Client
-*/
 #if DEBUG_ESP_ASYNC_TCP
 static size_t _connectionCount=0;
 #endif
@@ -242,18 +219,18 @@ bool AsyncClient::connect(IPAddress ip, uint16_t port, bool secure){
 #else
 bool AsyncClient::connect(IPAddress ip, uint16_t port){
 #endif
-  if (_pcb) //already connected
+  if (_pcb)
     return false;
   ip_addr_t addr;
   addr.addr = ip;
 #if LWIP_VERSION_MAJOR == 1
   netif* interface = ip_route(&addr);
-  if (!interface){ //no route to host
+  if (!interface){
     return false;
   }
 #endif
   tcp_pcb* pcb = tcp_new();
-  if (!pcb){ //could not allocate pcb
+  if (!pcb){
     return false;
   }
 
@@ -299,8 +276,6 @@ AsyncClient& AsyncClient::operator=(const AsyncClient& other){
   }
   _errorTracker = other._errorTracker;
 
-  // I am confused when "other._pcb" falls out of scope the destructor will
-  // close it? TODO: Look to see where this is used and how it might work.
   _pcb = other._pcb;
   if (_pcb) {
     _rx_last_packet = millis();
@@ -332,18 +307,6 @@ bool AsyncClient::operator==(const AsyncClient &other) {
 }
 
 void AsyncClient::abort(){
-  // Notes:
-  // 1) _pcb is set to NULL, so we cannot call tcp_abort() more than once.
-  // 2) setCloseError(ERR_ABRT) is only done here!
-  // 3) Using this abort() function guarantees only one tcp_abort() call is
-  //    made and only one CB returns with ERR_ABORT.
-  // 4) After abort() is called from _close(), no callbacks with an err
-  //    parameter will be called.  eg. _recv(), _error(), _connected().
-  //    _close() will reset there CB handlers before calling.
-  // 5) A callback to _error(), will set _pcb to NULL, thus avoiding the
-  //    of a 2nd call to tcp_abort().
-  // 6) Callbacks to _recv() or _connected() with err set, will result in _pcb
-  //    set to NULL. Thus, preventing possible calls later to tcp_abort().
   if(_pcb) {
     tcp_abort(_pcb);
     _pcb = NULL;
@@ -442,15 +405,7 @@ size_t AsyncClient::ack(size_t len){
   return len;
 }
 
-// Private Callbacks
-
 void AsyncClient::_connected(std::shared_ptr<ACErrorTracker>& errorTracker, void* pcb, err_t err){
-  //(void)err; // LWIP v1.4 appears to always call with ERR_OK
-  // Documentation for 2.1.0 also says:
-  //   "err	- An unused error code, always ERR_OK currently ;-)"
-  // https://www.nongnu.org/lwip/2_1_x/tcp_8h.html#a939867106bd492caf2d85852fb7f6ae8
-  // Based on that wording and emoji lets just handle it now.
-  // After all, the API does allow for an err != ERR_OK.
   if(NULL == pcb || ERR_OK != err) {
     ASYNC_TCP_DEBUG("_connected[%u]:%s err: %s(%ld)\n", errorTracker->getConnectionId(), ((NULL == pcb) ? " NULL == pcb!," : ""), errorToString(err), err);
     errorTracker->setCloseError(err);
@@ -522,8 +477,6 @@ void AsyncClient::_error(err_t err) {
       tcp_ssl_free(_pcb);
     }
 #endif
-    // At this callback _pcb is possible already freed. Thus, no calls are
-    // made to set to NULL other callbacks.
     _pcb = NULL;
   }
   if(_error_cb)
@@ -563,9 +516,6 @@ void AsyncClient::_sent(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
 }
 
 void AsyncClient::_recv(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* pcb, pbuf* pb, err_t err) {
-  // While lwIP v1.4 appears to always call with ERR_OK, 2.x lwIP may present
-  // a non-ERR_OK value.
-  // https://www.nongnu.org/lwip/2_1_x/tcp_8h.html#a780cfac08b02c66948ab94ea974202e8
   if(NULL == pcb || ERR_OK != err){
     ASYNC_TCP_DEBUG("_recv[%u]:%s err: %s(%ld)\n", errorTracker->getConnectionId(), ((NULL == pcb) ? " NULL == pcb!," : ""), errorToString(err), err);
     ASYNC_TCP_ASSERT(ERR_ABRT != err);
@@ -575,27 +525,6 @@ void AsyncClient::_recv(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
     if(_pcb)
       clearTcpCallbacks(_pcb);
     _pcb = NULL;
-    // I think we are safe from being called from an interrupt context.
-    // Best Hint that calling _error() is safe:
-    //    https://www.nongnu.org/lwip/2_1_x/group__lwip__nosys.html
-    // "Feed incoming packets to netif->input(pbuf, netif) function from
-    // mainloop, not from interrupt context. You can allocate a Packet buffers
-    // (PBUF) in interrupt context and put them into a queue which is processed
-    // from mainloop."
-    // And the description of "Mainloop Mode" option 2:
-    //    https://www.nongnu.org/lwip/2_1_x/pitfalls.html
-    // "2) Run lwIP in a mainloop. ... lwIP is ONLY called from mainloop
-    // callstacks here. The ethernet IRQ has to put received telegrams into a
-    // queue which is polled in the mainloop. Ensure lwIP is NEVER called from
-    // an interrupt, ...!"
-    // Based on these comments I am thinking tcp_recv_fn() is called
-    // from somebody's mainloop(), which could only have been reached from a
-    // delay like function or the Arduino sketch loop() function has returned.
-    // What I don't want is for the client sketch to delete the AsyncClient
-    // object via _error() while it is in the middle of using it. However,
-    // the client sketch must always test that the connection is still up
-    // at loop() entry and after the return of any function call, that may
-    // have done a delay() or yield().
     _error(err);
     return;
   }
@@ -621,9 +550,6 @@ void AsyncClient::_recv(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
   }
 #endif
   while(pb != NULL){
-    // IF this callback function returns ERR_OK or ERR_ABRT
-    // then it is assummed we freed the pbufs.
-    // https://www.nongnu.org/lwip/2_1_x/group__tcp__raw.html#ga8afd0b316a87a5eeff4726dc95006ed0
     if(!errorTracker->hasClient()){
       while(pb != NULL){
         pbuf *b = pb;
@@ -633,7 +559,6 @@ void AsyncClient::_recv(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
       }
       return;
     }
-    //we should not ack before we assimilate the data
     _ack_pcb = true;
     pbuf *b = pb;
     pb = b->next;
@@ -662,7 +587,6 @@ void AsyncClient::_poll(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
   (void)pcb;
   errorTracker->setCloseError(ERR_OK);
 
-  // Close requested
   if(_close_pcb){
     _close_pcb = false;
     _close();
@@ -670,26 +594,22 @@ void AsyncClient::_poll(std::shared_ptr<ACErrorTracker>& errorTracker, tcp_pcb* 
   }
   uint32_t now = millis();
 
-  // ACK Timeout
   if(_pcb_busy && _ack_timeout && (now - _pcb_sent_at) >= _ack_timeout){
     _pcb_busy = false;
     if(_timeout_cb)
       _timeout_cb(_timeout_cb_arg, this, (now - _pcb_sent_at));
     return;
   }
-  // RX Timeout
   if(_rx_since_timeout && (now - _rx_last_packet) >= (_rx_since_timeout * 1000)){
     _close();
     return;
   }
 #if ASYNC_TCP_SSL_ENABLED
-  // SSL Handshake Timeout
   if(_pcb_secure && !_handshake_done && (now - _rx_last_packet) >= 2000){
     _close();
     return;
   }
 #endif
-  // Everything is fine
   if(_poll_cb)
     _poll_cb(_poll_cb_arg, this);
   return;
@@ -714,7 +634,6 @@ void AsyncClient::_dns_found(const ip_addr *ipaddr){
   }
 }
 
-// lwIP Callbacks
 #if LWIP_VERSION_MAJOR == 1
 void AsyncClient::_s_dns_found(const char *name, ip_addr_t *ipaddr, void *arg){
 #else
@@ -778,8 +697,6 @@ void AsyncClient::_s_ssl_error(void *arg, struct tcp_pcb *tcp, int8_t err){
   reinterpret_cast<AsyncClient*>(arg)->_ssl_error(err);
 }
 #endif
-
-// Operators
 
 AsyncClient & AsyncClient::operator+=(const AsyncClient &other) {
   if(next == NULL){
@@ -925,8 +842,6 @@ bool AsyncClient::canSend(){
 }
 
 
-// Callback Setters
-
 void AsyncClient::onConnect(AcConnectHandler cb, void* arg){
   _connect_cb = cb;
   _connect_cb_arg = arg;
@@ -976,18 +891,18 @@ size_t AsyncClient::space(){
 #ifdef AXTLS_2_0_0_SNDBUF
       return tcp_ssl_sndbuf(_pcb);
 #else
-      if(s >= 128) //safe approach
+      if(s >= 128)
         return s - 128;
       return 0;
 #endif
     }
     return s;
   }
-#else // ASYNC_TCP_SSL_ENABLED
+#else
   if((_pcb != NULL) && (_pcb->state == 4)){
     return tcp_sndbuf(_pcb);
   }
-#endif // ASYNC_TCP_SSL_ENABLED
+#endif
   return 0;
 }
 
@@ -1042,9 +957,6 @@ const char * AsyncClient::stateToString(){
   }
 }
 
-/*
-  Async TCP Server
-*/
 struct pending_pcb {
     tcp_pcb* pcb;
     pbuf *pb;
@@ -1121,7 +1033,6 @@ void AsyncServer::begin(){
   ip_addr_t local_addr;
   local_addr.addr = (uint32_t) _addr;
   err = tcp_bind(pcb, &local_addr, _port);
-  // Failures are ERR_ISCONN or ERR_USE
   if (err != ERR_OK) {
     tcp_close(pcb);
     return;
@@ -1152,7 +1063,6 @@ void AsyncServer::beginSecure(const char *cert, const char *key, const char *pas
 
 void AsyncServer::end(){
   if(_pcb){
-    //cleanup all connections?
     tcp_arg(_pcb, NULL);
     tcp_accept(_pcb, NULL);
     if(tcp_close(_pcb) != ERR_OK){
@@ -1194,12 +1104,7 @@ uint8_t AsyncServer::status(){
 }
 
 err_t AsyncServer::_accept(tcp_pcb* pcb, err_t err){
-  //http://savannah.nongnu.org/bugs/?43739
   if(NULL == pcb || ERR_OK != err){
-    // https://www.nongnu.org/lwip/2_1_x/tcp_8h.html#a00517abce6856d6c82f0efebdafb734d
-    // An error code if there has been an error accepting. Only return ERR_ABRT
-    // if you have called tcp_abort from within the callback function!
-    // eg. 2.1.0 could call with error on failure to allocate pcb.
     ASYNC_TCP_DEBUG("_accept:%s err: %ld\n", ((NULL == pcb) ? " NULL == pcb!," : ""), err);
     ASYNC_TCP_ASSERT(ERR_ABRT != err);
 #ifdef DEBUG_MORE
@@ -1323,7 +1228,6 @@ err_t AsyncServer::_poll(tcp_pcb* pcb){
       if(p->pb)
         c->_recv(pcb, p->pb, 0);
     }
-    // Should there be error handling for when "new AsynClient" fails??
     free(p);
   }
   return ERR_OK;

@@ -34,7 +34,7 @@ TEST_CASE("JsonVariant::add(T)") {
   SECTION("add integer to integer") {
     var.set(123);
 
-    var.add(456);  // no-op
+    var.add(456);
 
     REQUIRE(var.as<std::string>() == "123");
   }
@@ -42,7 +42,7 @@ TEST_CASE("JsonVariant::add(T)") {
   SECTION("add integer to object") {
     var["val"] = 123;
 
-    var.add(456);  // no-op
+    var.add(456);
 
     REQUIRE(var.as<std::string>() == "{\"val\":123}");
   }
@@ -99,7 +99,7 @@ TEST_CASE("JsonObject::add(JsonObject) ") {
                          });
   }
 
-  SECTION("partial failure") {  // issue #2081
+  SECTION("partial failure") {
     allocator.setCountdown(2);
 
     bool result = variant.add(doc1.as<JsonObject>());

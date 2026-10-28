@@ -6,7 +6,7 @@
 
 namespace my {
 using ArduinoJson::detail::isinf;
-}  // namespace my
+}
 
 TEST_CASE("ARDUINOJSON_ENABLE_INFINITY == 1") {
   JsonDocument doc;

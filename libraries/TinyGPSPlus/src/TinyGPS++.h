@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <limits.h>
 
-#define _GPS_VERSION "1.0.2" // software version of this library
+#define _GPS_VERSION "1.0.2"
 #define _GPS_MPH_PER_KNOT 1.15077945
 #define _GPS_MPS_PER_KNOT 0.51444444
 #define _GPS_KMPH_PER_KNOT 1.852
@@ -220,7 +220,7 @@ class TinyGPSPlus
 {
 public:
   TinyGPSPlus();
-  bool encode(char c); // process one character received from GPS
+  bool encode(char c);
   TinyGPSPlus &operator << (char c) {encode(c); return *this;}
 
   TinyGPSLocation location;
@@ -249,7 +249,6 @@ public:
 private:
   enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
 
-  // parsing state variables
   uint8_t parity;
   bool isChecksumTerm;
   char term[_GPS_MAX_FIELD_SIZE];
@@ -258,21 +257,18 @@ private:
   uint8_t curTermOffset;
   bool sentenceHasFix;
 
-  // custom element support
   friend class TinyGPSCustom;
   TinyGPSCustom *customElts;
   TinyGPSCustom *customCandidates;
   void insertCustom(TinyGPSCustom *pElt, const char *sentenceName, int index);
 
-  // statistics
   uint32_t encodedCharCount;
   uint32_t sentencesWithFixCount;
   uint32_t failedChecksumCount;
   uint32_t passedChecksumCount;
 
-  // internal utilities
   int fromHex(char a);
   bool endOfTermHandler();
 };
 
-#endif // def(__TinyGPSPlus_h)
+#endif

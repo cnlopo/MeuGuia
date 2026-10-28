@@ -29,7 +29,7 @@ bool canConvertFromJson(JsonVariantConst src, const Date&) {
   return src["day"].is<int>() && src["month"].is<int>() &&
          src["year"].is<int>();
 }
-}  // namespace
+}
 
 TEST_CASE("Custom converter with overloading") {
   JsonDocument doc;
@@ -104,7 +104,7 @@ struct Converter<Complex> {
     return src["real"].is<double>() && src["imag"].is<double>();
   }
 };
-}  // namespace ArduinoJson
+}
 
 TEST_CASE("Custom converter with specialization") {
   JsonDocument doc;

@@ -4,8 +4,6 @@
 
 #include <ArduinoJson.h>
 
-// See issue #1498
-
 int main() {
   JsonDocument doc;
   doc["dummy"] = 'A';

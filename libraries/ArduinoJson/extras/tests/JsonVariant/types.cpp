@@ -43,9 +43,6 @@ TEST_CASE("JsonVariant set()/get()") {
   }
 #endif
 
-  // /!\ Most test were moved to `JsonVariant/set.cpp`
-  // TODO: move the remaining tests too
-
   SECTION("False") {
     variant.set(false);
     REQUIRE(variant.as<bool>() == false);
@@ -138,7 +135,7 @@ TEST_CASE("volatile") {
   JsonDocument doc;
   JsonVariant variant = doc.to<JsonVariant>();
 
-  SECTION("volatile bool") {  // issue #2029
+  SECTION("volatile bool") {
     volatile bool f = true;
     variant.set(f);
     CHECK(variant.is<bool>() == true);
@@ -152,7 +149,7 @@ TEST_CASE("volatile") {
     CHECK(variant.as<int>() == 42);
   }
 
-  SECTION("volatile float") {  // issue #1557
+  SECTION("volatile float") {
     volatile float f = 3.14f;
     variant.set(f);
     CHECK(variant.is<float>() == true);

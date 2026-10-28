@@ -19,7 +19,6 @@ class StringBuffer {
 
   char* reserve(size_t capacity) {
     if (node_ && capacity > node_->length) {
-      // existing buffer is too small, we need to reallocate
       resources_->destroyString(node_);
       node_ = nullptr;
     }
@@ -28,7 +27,7 @@ class StringBuffer {
     if (!node_)
       return nullptr;
     size_ = capacity;
-    node_->data[capacity] = 0;  // null-terminate the string
+    node_->data[capacity] = 0;
     return node_->data;
   }
 
@@ -62,7 +61,7 @@ class StringBuffer {
 
     if (node_->length != size_) {
       node = resources_->resizeString(node_, size_);
-      ARDUINOJSON_ASSERT(node != nullptr);  // realloc to smaller can't fail
+      ARDUINOJSON_ASSERT(node != nullptr);
     } else {
       node = node_;
     }

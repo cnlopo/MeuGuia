@@ -15,6 +15,5 @@ struct make_void {
 
 template <typename... Args>
 using void_t = typename make_void<Args...>::type;
-// NOTE: using void_t = void; doesn't work on GCC 4.8
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

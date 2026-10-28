@@ -8,7 +8,7 @@
 #include <ArduinoJson/Polyfills/assert.hpp>
 #include <ArduinoJson/Polyfills/utility.hpp>
 
-#include <string.h>  // memcpy
+#include <string.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
@@ -35,25 +35,20 @@ class MemoryPoolList {
     bool aUsedPreallocated = a.pools_ == a.preallocatedPools_;
     bool bUsedPreallocated = b.pools_ == b.preallocatedPools_;
 
-    // Who is using preallocated pools?
     if (aUsedPreallocated && bUsedPreallocated) {
-      // both of us => swap preallocated pools
       for (PoolCount i = 0; i < ARDUINOJSON_INITIAL_POOL_COUNT; i++)
         swap_(a.preallocatedPools_[i], b.preallocatedPools_[i]);
     } else if (bUsedPreallocated) {
-      // only b => copy b's preallocated pools and give him a's pointer
       for (PoolCount i = 0; i < b.count_; i++)
         a.preallocatedPools_[i] = b.preallocatedPools_[i];
       b.pools_ = a.pools_;
       a.pools_ = a.preallocatedPools_;
     } else if (aUsedPreallocated) {
-      // only a => copy a's preallocated pools and give him b's pointer
       for (PoolCount i = 0; i < a.count_; i++)
         b.preallocatedPools_[i] = a.preallocatedPools_[i];
       a.pools_ = b.pools_;
       b.pools_ = b.preallocatedPools_;
     } else {
-      // neither => swap pointers
       swap_(a.pools_, b.pools_);
     }
 
@@ -80,19 +75,16 @@ class MemoryPoolList {
   }
 
   Slot<T> allocSlot(Allocator* allocator) {
-    // try to allocate from free list
     if (freeList_ != NULL_SLOT) {
       return allocFromFreeList();
     }
 
-    // try to allocate from last pool (other pools are full)
     if (count_) {
       auto slot = allocFromLastPool();
       if (slot)
         return slot;
     }
 
-    // create a new pool and try again
     auto pool = addPool(allocator);
     if (!pool)
       return {};
@@ -143,7 +135,7 @@ class MemoryPoolList {
     if (pools_ != preallocatedPools_ && count_ != capacity_) {
       pools_ = static_cast<Pool*>(
           allocator->reallocate(pools_, count_ * sizeof(Pool)));
-      ARDUINOJSON_ASSERT(pools_ != nullptr);  // realloc to smaller can't fail
+      ARDUINOJSON_ASSERT(pools_ != nullptr);
       capacity_ = count_;
     }
   }
@@ -172,7 +164,7 @@ class MemoryPoolList {
       return nullptr;
     auto pool = &pools_[count_++];
     SlotCount poolCapacity = ARDUINOJSON_POOL_CAPACITY;
-    if (count_ == maxPools)  // last pool is smaller because of NULL_SLOT
+    if (count_ == maxPools)
       poolCapacity--;
     pool->create(poolCapacity, allocator);
     return pool;

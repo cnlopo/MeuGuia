@@ -28,12 +28,11 @@ static bool isTinyString(const T& s, size_t n) {
 }
 
 class VariantData {
-  VariantContent content_;  // must be first to allow cast from array to variant
+  VariantContent content_;
   VariantType type_;
   SlotId next_;
 
  public:
-  // Placement new
   static void* operator new(size_t, void* p) noexcept {
     return p;
   }
@@ -56,7 +55,7 @@ class VariantData {
 #if ARDUINOJSON_USE_EXTENSIONS
     auto extension = getExtension(resources);
 #else
-    (void)resources;  // silence warning
+    (void)resources;
 #endif
     switch (type_) {
       case VariantType::Float:
@@ -148,7 +147,7 @@ class VariantData {
 #if ARDUINOJSON_USE_EXTENSIONS
     auto extension = getExtension(resources);
 #else
-    (void)resources;  // silence warning
+    (void)resources;
 #endif
     switch (type_) {
       case VariantType::Boolean:
@@ -196,7 +195,7 @@ class VariantData {
 #if ARDUINOJSON_USE_EXTENSIONS
     auto extension = getExtension(resources);
 #else
-    (void)resources;  // silence warning
+    (void)resources;
 #endif
     const char* str = nullptr;
     switch (type_) {
@@ -241,7 +240,7 @@ class VariantData {
 #if ARDUINOJSON_USE_EXTENSIONS
     auto extension = getExtension(resources);
 #else
-    (void)resources;  // silence warning
+    (void)resources;
 #endif
     const char* str = nullptr;
     switch (type_) {
@@ -378,7 +377,7 @@ class VariantData {
 #if ARDUINOJSON_USE_LONG_LONG
     auto extension = getExtension(resources);
 #else
-    (void)resources;  // silence warning
+    (void)resources;
 #endif
     switch (type_) {
       case VariantType::Uint32:
@@ -459,19 +458,19 @@ class VariantData {
     var->removeMember(key, resources);
   }
 
-  void reset() {  // TODO: remove
+  void reset() {
     type_ = VariantType::Null;
   }
 
   void setBoolean(bool value) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     type_ = VariantType::Boolean;
     content_.asBoolean = value;
   }
 
   template <typename T>
   enable_if_t<sizeof(T) == 4, bool> setFloat(T value, ResourceManager*) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     type_ = VariantType::Float;
     content_.asFloat = value;
     return true;
@@ -489,7 +488,7 @@ class VariantData {
       T value, ResourceManager* resources);
 
   void setRawString(StringNode* s) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     ARDUINOJSON_ASSERT(s);
     type_ = VariantType::RawString;
     content_.asOwnedString = s;
@@ -520,7 +519,7 @@ class VariantData {
   }
 
   void setLinkedString(const char* s) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     ARDUINOJSON_ASSERT(s);
     type_ = VariantType::LinkedString;
     content_.asLinkedString = s;
@@ -528,7 +527,7 @@ class VariantData {
 
   template <typename TAdaptedString>
   void setTinyString(const TAdaptedString& s) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     ARDUINOJSON_ASSERT(s.size() <= tinyStringMaxLength);
 
     type_ = VariantType::TinyString;
@@ -536,7 +535,7 @@ class VariantData {
     auto n = uint8_t(s.size());
     for (uint8_t i = 0; i < n; i++) {
       char c = s[i];
-      ARDUINOJSON_ASSERT(c != 0);  // no NUL in tiny string
+      ARDUINOJSON_ASSERT(c != 0);
       content_.asTinyString[i] = c;
     }
 
@@ -544,7 +543,7 @@ class VariantData {
   }
 
   void setOwnedString(StringNode* s) {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     ARDUINOJSON_ASSERT(s);
     type_ = VariantType::OwnedString;
     content_.asOwnedString = s;
@@ -565,7 +564,7 @@ class VariantData {
   }
 
   ArrayData& toArray() {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     type_ = VariantType::Array;
     new (&content_.asArray) ArrayData();
     return content_.asArray;
@@ -579,7 +578,7 @@ class VariantData {
   }
 
   ObjectData& toObject() {
-    ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
+    ARDUINOJSON_ASSERT(type_ == VariantType::Null);
     type_ = VariantType::Object;
     new (&content_.asObject) ObjectData();
     return content_.asObject;
@@ -596,7 +595,6 @@ class VariantData {
     return type_;
   }
 
-  // Release the resources used by this variant and set it to null.
   void clear(ResourceManager* resources);
 
   static void clear(VariantData* var, ResourceManager* resources) {

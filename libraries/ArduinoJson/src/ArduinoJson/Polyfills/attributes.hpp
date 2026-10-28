@@ -4,15 +4,15 @@
 
 #pragma once
 
-#ifdef _MSC_VER  // Visual Studio
+#ifdef _MSC_VER
 
-#  define FORCE_INLINE  // __forceinline causes C4714 when returning std::string
+#  define FORCE_INLINE
 
 #  ifndef ARDUINOJSON_DEPRECATED
 #    define ARDUINOJSON_DEPRECATED(msg) __declspec(deprecated(msg))
 #  endif
 
-#elif defined(__GNUC__)  // GCC or Clang
+#elif defined(__GNUC__)
 
 #  define FORCE_INLINE __attribute__((always_inline))
 
@@ -24,7 +24,7 @@
 #    endif
 #  endif
 
-#else  // Other compilers
+#else
 
 #  define FORCE_INLINE
 

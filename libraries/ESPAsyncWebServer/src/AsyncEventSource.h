@@ -38,7 +38,7 @@
 
 #ifdef ESP8266
 #include <Hash.h>
-#ifdef CRYPTO_HASH_h // include Hash.h from espressif framework if the first include was from the crypto library
+#ifdef CRYPTO_HASH_h
 #include <../src/Hash.h>
 #endif
 #endif
@@ -59,7 +59,6 @@ class AsyncEventSourceMessage {
     uint8_t * _data;
     size_t _len;
     size_t _sent;
-    //size_t _ack;
     size_t _acked;
   public:
     AsyncEventSourceMessage(const char * data, size_t len);
@@ -92,7 +91,6 @@ class AsyncEventSourceClient {
     uint32_t lastId() const { return _lastId; }
     size_t  packetsWaiting() const { return _messageQueue.length(); }
 
-    //system callbacks (do not call)
     void _onAck(size_t len, uint32_t time);
     void _onPoll();
     void _onTimeout(uint32_t time);
@@ -112,10 +110,9 @@ class AsyncEventSource: public AsyncWebHandler {
     void close();
     void onConnect(ArEventHandlerFunction cb);
     void send(const char *message, const char *event=NULL, uint32_t id=0, uint32_t reconnect=0);
-    size_t count() const; //number clinets connected
+    size_t count() const;
     size_t  avgPacketsWaiting() const;
 
-    //system callbacks (do not call)
     void _addClient(AsyncEventSourceClient * client);
     void _handleDisconnect(AsyncEventSourceClient * client);
     virtual bool canHandle(AsyncWebServerRequest *request) override final;
@@ -134,4 +131,4 @@ class AsyncEventSourceResponse: public AsyncWebServerResponse {
 };
 
 
-#endif /* ASYNCEVENTSOURCE_H_ */
+#endif

@@ -39,28 +39,28 @@ struct Converter<MsgPackExtension> : private detail::VariantAttorney {
     if (src.data()) {
       uint8_t format, sizeBytes;
       if (src.size() >= 0x10000) {
-        format = 0xc9;  // ext 32
+        format = 0xc9;
         sizeBytes = 4;
       } else if (src.size() >= 0x100) {
-        format = 0xc8;  // ext 16
+        format = 0xc8;
         sizeBytes = 2;
       } else if (src.size() == 16) {
-        format = 0xd8;  // fixext 16
+        format = 0xd8;
         sizeBytes = 0;
       } else if (src.size() == 8) {
-        format = 0xd7;  // fixext 8
+        format = 0xd7;
         sizeBytes = 0;
       } else if (src.size() == 4) {
-        format = 0xd6;  // fixext 4
+        format = 0xd6;
         sizeBytes = 0;
       } else if (src.size() == 2) {
-        format = 0xd5;  // fixext 2
+        format = 0xd5;
         sizeBytes = 0;
       } else if (src.size() == 1) {
-        format = 0xd4;  // fixext 1
+        format = 0xd4;
         sizeBytes = 0;
       } else {
-        format = 0xc7;  // ext 8
+        format = 0xc7;
         sizeBytes = 1;
       }
 
@@ -93,7 +93,7 @@ struct Converter<MsgPackExtension> : private detail::VariantAttorney {
 
     const uint8_t& code = p[0];
 
-    if (code >= 0xd4 && code <= 0xd8) {  // fixext 1
+    if (code >= 0xd4 && code <= 0xd8) {
       headerSize = 2;
       payloadSize = size_t(1) << (code - 0xd4);
     }

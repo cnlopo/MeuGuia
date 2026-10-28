@@ -8,7 +8,7 @@
 #include <ArduinoJson/Namespace.hpp>
 #include <ArduinoJson/Polyfills/assert.hpp>
 
-#include <stddef.h>  // size_t
+#include <stddef.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
@@ -70,7 +70,6 @@ class CollectionData {
   SlotId tail_ = NULL_SLOT;
 
  public:
-  // Placement new
   static void* operator new(size_t, void* p) noexcept {
     return p;
   }
@@ -110,12 +109,12 @@ class CollectionData {
 
 inline const VariantData* collectionToVariant(
     const CollectionData* collection) {
-  const void* data = collection;  // prevent warning cast-align
+  const void* data = collection;
   return reinterpret_cast<const VariantData*>(data);
 }
 
 inline VariantData* collectionToVariant(CollectionData* collection) {
-  void* data = collection;  // prevent warning cast-align
+  void* data = collection;
   return reinterpret_cast<VariantData*>(data);
 }
 

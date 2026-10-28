@@ -10,7 +10,6 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 class EscapeSequence {
  public:
-  // Optimized for code size on a 8-bit AVR
   static char escapeChar(char c) {
     const char* p = escapeTable(true);
     while (p[0] && p[1] != c) {
@@ -19,7 +18,6 @@ class EscapeSequence {
     return p[0];
   }
 
-  // Optimized for code size on a 8-bit AVR
   static char unescapeChar(char c) {
     const char* p = escapeTable(false);
     for (;;) {

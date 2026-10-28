@@ -29,8 +29,8 @@ void checkDoubleInf(const char* input, bool negative) {
     REQUIRE(x < 0);
   else
     REQUIRE(x > 0);
-  REQUIRE(x == x);      // not a NaN
-  REQUIRE(x * 2 == x);  // a property of infinity
+  REQUIRE(x == x);
+  REQUIRE(x * 2 == x);
 }
 
 TEST_CASE("parseNumber<double>()") {
@@ -94,7 +94,7 @@ TEST_CASE("parseNumber<double>()") {
     checkDoubleNaN("nan");
   }
 
-  SECTION("Overflow exponent with decimal part") {  // Issue #2220
+  SECTION("Overflow exponent with decimal part") {
     checkDoubleNaN(
         "0.000000000000000000000000000000000000000000000000"
         "00000000000000000000000000000000000000000000000000"

@@ -14,8 +14,6 @@ class Writer<::String, void> {
 
  public:
   explicit Writer(::String& str) : destination_(&str), size_(0) {
-    // clear the string but don't use "" to avoid useless allocation
-    // https://cpp4arduino.com/2018/11/21/eight-tips-to-use-the-string-class-efficiently.html
     str = static_cast<const char*>(0);
   }
 

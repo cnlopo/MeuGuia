@@ -294,13 +294,13 @@ TEST_CASE("deserialize MsgPack value") {
 
 TEST_CASE("deserializeMsgPack() under memory constaints") {
   SECTION("single values always fit") {
-    checkError(0, "\xc0", DeserializationError::Ok);          // nil
-    checkError(0, "\xc2", DeserializationError::Ok);          // false
-    checkError(0, "\xc3", DeserializationError::Ok);          // true
-    checkError(0, "\xcc\x00", DeserializationError::Ok);      // uint 8
-    checkError(0, "\xcd\x30\x39", DeserializationError::Ok);  // uint 16
+    checkError(0, "\xc0", DeserializationError::Ok);
+    checkError(0, "\xc2", DeserializationError::Ok);
+    checkError(0, "\xc3", DeserializationError::Ok);
+    checkError(0, "\xcc\x00", DeserializationError::Ok);
+    checkError(0, "\xcd\x30\x39", DeserializationError::Ok);
     checkError(0, "\xCE\x12\x34\x56\x78",
-               DeserializationError::Ok);  // uint 32
+               DeserializationError::Ok);
   }
 
   SECTION("fixstr") {
@@ -325,11 +325,11 @@ TEST_CASE("deserializeMsgPack() under memory constaints") {
   }
 
   SECTION("fixarray") {
-    checkError(0, "\x90", DeserializationError::Ok);  // []
+    checkError(0, "\x90", DeserializationError::Ok);
     checkError(0, "\x91\x01",
-               DeserializationError::NoMemory);  // [1]
+               DeserializationError::NoMemory);
     checkError(1, "\x91\x01",
-               DeserializationError::Ok);  // [1]
+               DeserializationError::Ok);
   }
 
   SECTION("array 16") {

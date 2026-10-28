@@ -14,7 +14,6 @@ struct Reader<TSource, enable_if_t<is_base_of<Stream, TSource>::value>> {
   explicit Reader(Stream& stream) : stream_(&stream) {}
 
   int read() {
-    // don't use stream_->read() as it ignores the timeout
     char c;
     return stream_->readBytes(&c, 1) ? static_cast<unsigned char>(c) : -1;
   }

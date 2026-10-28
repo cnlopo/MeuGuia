@@ -104,8 +104,6 @@ static String generateEventMessage(const char *message, const char *event, uint3
   return ev;
 }
 
-// Message
-
 AsyncEventSourceMessage::AsyncEventSourceMessage(const char * data, size_t len)
 : _data(nullptr), _len(len), _sent(0), _acked(0)
 {
@@ -125,14 +123,11 @@ AsyncEventSourceMessage::~AsyncEventSourceMessage() {
 
 size_t AsyncEventSourceMessage::ack(size_t len, uint32_t time) {
   (void)time;
-  // If the whole message is now acked...
   if(_acked + len > _len){
-     // Return the number of extra bytes acked (they will be carried on to the next message)
      const size_t extra = _acked + len - _len;
      _acked = _len;
      return extra;
   }
-  // Return that no extra bytes left.
   _acked += len;
   return 0;
 }
@@ -149,8 +144,6 @@ size_t AsyncEventSourceMessage::send(AsyncClient *client) {
   _sent += sent;
   return sent;
 }
-
-// Client
 
 AsyncEventSourceClient::AsyncEventSourceClient(AsyncWebServerRequest *request, AsyncEventSource *server)
 : _messageQueue(LinkedList<AsyncEventSourceMessage *>([](AsyncEventSourceMessage *m){ delete  m; }))
@@ -248,8 +241,6 @@ void AsyncEventSourceClient::_runQueue(){
 }
 
 
-// Handler
-
 AsyncEventSource::AsyncEventSource(const String& url)
   : _url(url)
   , _clients(LinkedList<AsyncEventSourceClient *>([](AsyncEventSourceClient *c){ delete c; }))
@@ -265,18 +256,6 @@ void AsyncEventSource::onConnect(ArEventHandlerFunction cb){
 }
 
 void AsyncEventSource::_addClient(AsyncEventSourceClient * client){
-  /*char * temp = (char *)malloc(2054);
-  if(temp != NULL){
-    memset(temp+1,' ',2048);
-    temp[0] = ':';
-    temp[2049] = '\r';
-    temp[2050] = '\n';
-    temp[2051] = '\r';
-    temp[2052] = '\n';
-    temp[2053] = 0;
-    client->write((const char *)temp, 2053);
-    free(temp);
-  }*/
 
   _clients.add(client);
   if(_connectcb)
@@ -294,7 +273,6 @@ void AsyncEventSource::close(){
   }
 }
 
-// pmb fix
 size_t AsyncEventSource::avgPacketsWaiting() const {
   if(_clients.isEmpty())
     return 0;
@@ -308,8 +286,7 @@ size_t AsyncEventSource::avgPacketsWaiting() const {
       ++nConnectedClients;
     }
   }
-//  return aql / nConnectedClients;
-  return ((aql) + (nConnectedClients/2))/(nConnectedClients); // round up
+  return ((aql) + (nConnectedClients/2))/(nConnectedClients);
 }
 
 void AsyncEventSource::send(const char *message, const char *event, uint32_t id, uint32_t reconnect){
@@ -342,8 +319,6 @@ void AsyncEventSource::handleRequest(AsyncWebServerRequest *request){
     return request->requestAuthentication();
   request->send(new AsyncEventSourceResponse(this));
 }
-
-// Response
 
 AsyncEventSourceResponse::AsyncEventSourceResponse(AsyncEventSource *server){
   _server = server;

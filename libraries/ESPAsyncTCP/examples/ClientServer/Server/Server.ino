@@ -7,9 +7,8 @@
 
 static DNSServer DNS;
 
-static std::vector<AsyncClient*> clients; // a list to hold all clients
+static std::vector<AsyncClient*> clients;
 
- /* clients events */
 static void handleError(void* arg, AsyncClient* client, int8_t error) {
 	Serial.printf("\n connection error %s from client %s \n", client->errorToString(error), client->remoteIP().toString().c_str());
 }
@@ -18,7 +17,6 @@ static void handleData(void* arg, AsyncClient* client, void *data, size_t len) {
 	Serial.printf("\n data received from client %s \n", client->remoteIP().toString().c_str());
 	Serial.write((uint8_t*)data, len);
 
-	// reply to client
 	if (client->space() > 32 && client->canSend()) {
 		char reply[32];
 		sprintf(reply, "this is from %s", SERVER_HOST_NAME);
@@ -36,14 +34,11 @@ static void handleTimeOut(void* arg, AsyncClient* client, uint32_t time) {
 }
 
 
-/* server events */
 static void handleNewClient(void* arg, AsyncClient* client) {
 	Serial.printf("\n new client has been connected to server, ip: %s", client->remoteIP().toString().c_str());
 
-	// add to list
 	clients.push_back(client);
 	
-	// register events
 	client->onData(&handleData, NULL);
 	client->onError(&handleError, NULL);
 	client->onDisconnect(&handleDisconnect, NULL);
@@ -54,16 +49,14 @@ void setup() {
 	Serial.begin(115200);
 	delay(20);
 	
-	// create access point
 	while (!WiFi.softAP(SSID, PASSWORD, 6, false, 15)) {
 		delay(500);
 	}
 
-	// start dns server
 	if (!DNS.start(DNS_PORT, SERVER_HOST_NAME, WiFi.softAPIP()))
 		Serial.printf("\n failed to start dns service \n");
 
-	AsyncServer* server = new AsyncServer(TCP_PORT); // start listening on tcp port 7050
+	AsyncServer* server = new AsyncServer(TCP_PORT);
 	server->onClient(&handleNewClient, server);
 	server->begin();
 }

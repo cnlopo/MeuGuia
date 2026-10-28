@@ -4,9 +4,7 @@
 
 #include <ArduinoJson/Namespace.hpp>
 
-#include <string.h>  // strcmp, strncmp
-
-// Issue #1198: strcmp() implementation that returns a value larger than 8-bit
+#include <string.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 

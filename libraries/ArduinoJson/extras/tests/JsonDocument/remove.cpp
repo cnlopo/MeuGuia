@@ -78,7 +78,7 @@ TEST_CASE("JsonDocument::remove()") {
     doc[2] = 1;
 
     doc.remove(doc[2]);
-    doc.remove(doc[3]);  // noop
+    doc.remove(doc[3]);
 
     REQUIRE(doc.as<std::string>() == "[3,1]");
   }

@@ -10,7 +10,7 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename T>
 struct is_class {
- protected:  // <- to avoid GCC's "all member functions in class are private"
+ protected:
   template <typename U>
   static int probe(void (U::*)(void));
   template <typename>

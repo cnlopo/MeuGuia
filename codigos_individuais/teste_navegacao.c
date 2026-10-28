@@ -3,7 +3,6 @@
 
 #include "navegacao.h"
 
-/* Constantes próprias do teste: se o módulo errar um dígito, o teste não erra junto. */
 #define PI_TESTE 3.14159265358979323846
 #define RAIO_TERRA_TESTE_METROS 6371000.0
 #define METROS_POR_GRAU (2.0 * PI_TESTE * RAIO_TERRA_TESTE_METROS / 360.0)
@@ -61,8 +60,6 @@ static void confere_nivel(const char *nome, NivelProximidade esperado, NivelProx
     confere(nome, esperado, obtido, 0.0);
 }
 
-/* Nos cenários o destino é o ponto de Ribeirão e o ônibus anda pelo meridiano,
-   então a distância é exatamente os metros ao norte (ou ao sul, se negativos). */
 static EstadoNavegacao estado;
 static uint32_t agora_ms;
 

@@ -233,7 +233,7 @@ TEST_CASE("JsonObject::add(JsonObject) ") {
                          });
   }
 
-  SECTION("partial failure") {  // issue #2081
+  SECTION("partial failure") {
     allocator.setCountdown(2);
 
     bool result = array.add(doc1.as<JsonObject>());

@@ -23,9 +23,6 @@
 #define SYNCCLIENT_H_
 
 #include "Client.h"
-// Needed for Arduino core releases prior to 2.5.0, because of changes
-// made to accommodate Arduino core 2.5.0
-// CONST was 1st defined in Core 2.5.0 in IPAddress.h
 #ifndef CONST
 #define CONST
 #endif
@@ -106,4 +103,4 @@ class SyncClient: public Client {
     int read(uint8_t *data, size_t len);
 };
 
-#endif /* SYNCCLIENT_H_ */
+#endif

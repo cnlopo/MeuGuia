@@ -6,11 +6,8 @@
 
 #include <ArduinoJson/Namespace.hpp>
 
-#include <stdint.h>  // uint16_t, uint32_t
+#include <stdint.h>
 
-// The high surrogate may be uninitialized if the pair is invalid,
-// we choose to ignore the problem to reduce the size of the code
-// Garbage in => Garbage out
 #if defined(__GNUC__)
 #  if __GNUC__ >= 7
 #    pragma GCC diagnostic push
@@ -57,7 +54,7 @@ class Codepoint {
   uint16_t highSurrogate_;
   uint32_t codepoint_;
 };
-}  // namespace Utf16
+}
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 
 #if defined(__GNUC__)

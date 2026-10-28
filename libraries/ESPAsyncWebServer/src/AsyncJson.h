@@ -1,37 +1,3 @@
-// AsyncJson.h
-/*
-  Async Response to use with ArduinoJson and AsyncWebServer
-  Written by Andrew Melvin (SticilFace) with help from me-no-dev and BBlanchon.
-
-  Example of callback in use
-
-   server.on("/json", HTTP_ANY, [](AsyncWebServerRequest * request) {
-
-    AsyncJsonResponse * response = new AsyncJsonResponse();
-    JsonObject& root = response->getRoot();
-    root["key1"] = "key number one";
-    JsonObject& nested = root.createNestedObject("nested");
-    nested["key1"] = "key number one";
-
-    response->setLength();
-    request->send(response);
-  });
-
-  --------------------
-
-  Async Request to use with ArduinoJson and AsyncWebServer
-  Written by Arsène von Wyss (avonwyss)
-
-  Example
-
-  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/rest/endpoint");
-  handler->onRequest([](AsyncWebServerRequest *request, JsonVariant &json) {
-    JsonObject& jsonObj = json.as<JsonObject>();
-    // ...
-  });
-  server.addHandler(handler);
-  
-*/
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
 #include <ArduinoJson.h>
@@ -47,10 +13,6 @@
 #endif
 
 constexpr const char* JSON_MIMETYPE = "application/json";
-
-/*
- * Json Response
- * */
 
 class ChunkPrint : public Print {
   private:

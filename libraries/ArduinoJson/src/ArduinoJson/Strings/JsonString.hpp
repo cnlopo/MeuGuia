@@ -13,8 +13,6 @@
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-// A string.
-// https://arduinojson.org/v7/api/jsonstring/
 class JsonString {
   friend struct detail::StringAdapter<JsonString>;
 
@@ -31,33 +29,26 @@ class JsonString {
   JsonString(const char* data, TSize sz, bool isStatic = false)
       : str_(data, size_t(sz), isStatic) {}
 
-  // Returns a pointer to the characters.
   const char* c_str() const {
     return str_.data();
   }
 
-  // Returns true if the string is null.
   bool isNull() const {
     return str_.isNull();
   }
 
-  // Returns true if the string is stored by address.
-  // Returns false if the string is stored by copy.
   bool isStatic() const {
     return str_.isStatic();
   }
 
-  // Returns length of the string.
   size_t size() const {
     return str_.size();
   }
 
-  // Returns true if the string is non-null
   explicit operator bool() const {
     return str_.data() != 0;
   }
 
-  // Returns true if strings are equal.
   friend bool operator==(JsonString lhs, JsonString rhs) {
     if (lhs.size() != rhs.size())
       return false;
@@ -70,7 +61,6 @@ class JsonString {
     return memcmp(lhs.c_str(), rhs.c_str(), lhs.size()) == 0;
   }
 
-  // Returns true if strings differs.
   friend bool operator!=(JsonString lhs, JsonString rhs) {
     return !(lhs == rhs);
   }
@@ -95,6 +85,6 @@ struct StringAdapter<JsonString> {
     return s.str_;
   }
 };
-}  // namespace detail
+}
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

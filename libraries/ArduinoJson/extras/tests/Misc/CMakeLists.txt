@@ -31,7 +31,7 @@ set_tests_properties(Misc
 )
 
 add_executable(Issue2181
-	issue2181.cpp # Cannot be linked with other tests
+	issue2181.cpp
 )
 
 set_target_properties(Issue2181 PROPERTIES UNITY_BUILD OFF)
@@ -46,6 +46,6 @@ set_tests_properties(Issue2181
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	target_compile_options(Issue2181
 		PRIVATE
-			-Wno-keyword-macro # keyword is hidden by macro definition
+			-Wno-keyword-macro
 	)
 endif()

@@ -4,8 +4,7 @@
 
 #pragma once
 
-// Reproduces Arduino's Stream class
-class Stream  // : public Print
+class Stream
 {
  public:
   virtual ~Stream() {}

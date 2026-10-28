@@ -7,20 +7,17 @@
 #include <ArduinoJson/Namespace.hpp>
 #include <ArduinoJson/Polyfills/utility.hpp>
 
-#include <stdlib.h>  // for size_t
+#include <stdlib.h>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-// The default reader is a simple wrapper for Readers that are not copyable
 template <typename TSource, typename Enable = void>
 struct Reader {
  public:
   Reader(TSource& source) : source_(&source) {}
 
   int read() {
-    // clang-format off
-    return source_->read();  // Error here? See https://arduinojson.org/v7/invalid-input/
-    // clang-format on
+    return source_->read();
   }
 
   size_t readBytes(char* buffer, size_t length) {
@@ -33,8 +30,6 @@ struct Reader {
 
 template <typename TSource, typename Enable = void>
 struct BoundedReader {
-  // no default implementation because we need to pass the size to the
-  // constructor
 };
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

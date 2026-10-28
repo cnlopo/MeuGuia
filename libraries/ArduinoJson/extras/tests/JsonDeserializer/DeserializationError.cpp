@@ -12,12 +12,10 @@ void testStringification(DeserializationError error, std::string expected) {
 }
 
 void testBoolification(DeserializationError error, bool expected) {
-  // DeserializationError on left-hand side
   CHECK(bool(error) == expected);
   CHECK(bool(error) != !expected);
   CHECK(!bool(error) == !expected);
 
-  // DeserializationError on right-hand side
   CHECK(expected == bool(error));
   CHECK(!expected != bool(error));
   CHECK(!expected == !bool(error));

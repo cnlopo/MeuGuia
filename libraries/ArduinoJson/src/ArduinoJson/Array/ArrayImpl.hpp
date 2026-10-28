@@ -71,7 +71,6 @@ inline bool ArrayData::addValue(const T& value, ResourceManager* resources) {
   return true;
 }
 
-// Returns the size (in bytes) of an array with n elements.
 constexpr size_t sizeofArray(size_t n) {
   return n * ResourceManager::slotSize;
 }

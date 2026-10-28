@@ -5,7 +5,7 @@
 #include <ArduinoJson.h>
 #include <catch.hpp>
 
-#include <stdlib.h>  // malloc, free
+#include <stdlib.h>
 #include <string>
 
 #include "Allocators.hpp"
@@ -27,10 +27,8 @@ class ArmoredAllocator : public Allocator {
   }
 
   void* reallocate(void* ptr, size_t new_size) override {
-    // don't call realloc, instead alloc a new buffer and erase the old one
-    // this way we make sure we support relocation
     void* new_ptr = malloc(new_size);
-    memset(new_ptr, '#', new_size);  // erase
+    memset(new_ptr, '#', new_size);
     if (ptr) {
       memcpy(new_ptr, ptr, std::min(new_size, new_size));
       free(ptr);

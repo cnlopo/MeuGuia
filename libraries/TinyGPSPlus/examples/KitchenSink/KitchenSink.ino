@@ -1,20 +1,12 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
-/*
-   This sample code demonstrates just about every built-in operation of TinyGPSPlus (TinyGPSPlus).
-   It requires the use of SoftwareSerial, and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
-*/
 static const int RXPin = 4, TXPin = 3;
 static const uint32_t GPSBaud = 4800;
 
-// The TinyGPSPlus object
 TinyGPSPlus gps;
 
-// The serial connection to the GPS device
 SoftwareSerial ss(RXPin, TXPin);
 
-// For stats that happen every 5 seconds
 unsigned long last = 0UL;
 
 void setup()
@@ -31,7 +23,6 @@ void setup()
 
 void loop()
 {
-  // Dispatch incoming characters
   while (ss.available() > 0)
     gps.encode(ss.read());
 

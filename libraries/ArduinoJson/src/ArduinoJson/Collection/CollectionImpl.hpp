@@ -109,11 +109,9 @@ inline void CollectionData::removePair(ObjectData::iterator it,
   auto valueId = it.nextId_;
   auto valueSlot = resources->getVariant(valueId);
 
-  // remove value slot
   keySlot->setNext(valueSlot->next());
   resources->freeVariant({valueSlot, valueId});
 
-  // remove key slot
   removeOne(it, resources);
 }
 

@@ -59,7 +59,6 @@ inline FloatParts decomposeFloat(JsonFloat value, int8_t decimalPlaces) {
   int16_t exponent = normalize(value);
 
   uint32_t integral = uint32_t(value);
-  // reduce number of decimal places by the number of integral places
   for (uint32_t tmp = integral; tmp >= 10; tmp /= 10) {
     maxDecimalPart /= 10;
     decimalPlaces--;
@@ -71,8 +70,6 @@ inline FloatParts decomposeFloat(JsonFloat value, int8_t decimalPlaces) {
   uint32_t decimal = uint32_t(remainder);
   remainder = remainder - JsonFloat(decimal);
 
-  // rounding:
-  // increment by 1 if remainder >= 0.5
   decimal += uint32_t(remainder * 2);
   if (decimal >= maxDecimalPart) {
     decimal = 0;
@@ -83,7 +80,6 @@ inline FloatParts decomposeFloat(JsonFloat value, int8_t decimalPlaces) {
     }
   }
 
-  // remove trailing zeros
   while (decimal % 10 == 0 && decimalPlaces > 0) {
     decimal /= 10;
     decimalPlaces--;

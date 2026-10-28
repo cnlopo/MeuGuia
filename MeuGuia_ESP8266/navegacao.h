@@ -28,8 +28,6 @@ typedef struct {
     double ultima_longitude;
     uint32_t tempo_ultima_ms;
 
-    /* Leituras que pularam demais; viram a posição válida após LEITURAS_CONFIRMAR_SALTO
-       seguidas concordando. */
     int saltos_seguidos;
     double salto_latitude;
     double salto_longitude;
@@ -50,9 +48,6 @@ double distancia_metros(double latitude_origem, double longitude_origem, double 
 
 void iniciar_navegacao(EstadoNavegacao *estado, double destino_latitude, double destino_longitude);
 
-/* tempo_ms vem de millis() no .ino; nos testes, de valores inventados.
-   Devolve o nível atual a cada leitura, mesmo descartada: quem chama deve reagir à mudança
-   de nível. PASSOU toca uma vez; ENCERRADA é fim de viagem, sem vibração. */
 NivelProximidade atualizar_navegacao(EstadoNavegacao *estado, double latitude, double longitude,
                                      uint32_t tempo_ms);
 

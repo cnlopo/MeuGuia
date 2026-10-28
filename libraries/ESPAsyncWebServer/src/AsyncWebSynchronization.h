@@ -1,13 +1,10 @@
 #ifndef ASYNCWEBSYNCHRONIZATION_H_
 #define ASYNCWEBSYNCHRONIZATION_H_
 
-// Synchronisation is only available on ESP32, as the ESP8266 isn't using FreeRTOS by default
-
 #include <ESPAsyncWebServer.h>
 
 #if defined(ESP32) || (defined(LIBRETINY) && LT_HAS_FREERTOS)
 
-// This is the ESP32 version of the Sync Lock, using the FreeRTOS Semaphore
 class AsyncWebLock
 {
 private:
@@ -43,7 +40,6 @@ public:
 
 #else
 
-// This is the 8266 version of the Sync Lock which is currently unimplemented
 class AsyncWebLock
 {
 
@@ -84,4 +80,4 @@ public:
   }
 };
 
-#endif // ASYNCWEBSYNCHRONIZATION_H_
+#endif
