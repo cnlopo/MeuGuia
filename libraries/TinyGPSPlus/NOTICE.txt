@@ -1,0 +1,6 @@
+TinyGPSPlus
+Versao: 1.0.3
+Autor: Mikal Hart
+Original: https://github.com/mikalhart/TinyGPSPlus
+Licenca: LGPL 2.1 ou posterior, conforme o cabecalho de TinyGPS++.h
+Copiada sem alteracoes.
