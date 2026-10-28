@@ -10,7 +10,7 @@ ANTES DE COMPILAR
 3. Instale o core esp8266 na versao 3.1.2 exata (Boards Manager).
 4. Selecione a placa "LOLIN(WEMOS) D1 R2 & mini". NAO use a "LOLIN(WeMos) D1 R1": nela D1/D2 apontam para GPIO1/GPIO16 em vez de GPIO5/GPIO4 e o GPS nao deve funcionar.
 5. Bibliotecas:
-   - TinyGPSPlus 1.0.3: instale pelo Library Manager (nao vem no repositorio).
+   - TinyGPSPlus: agora vem em libraries/TinyGPSPlus (versao 1.0.3, LGPL 2.1, sem alteracoes). As quatro pastas ArduinoJson, ESPAsyncTCP, ESPAsyncWebServer e TinyGPSPlus de libraries/ devem ser copiadas para a pasta de bibliotecas do usuario.
    - ArduinoJson 7.4.3, ESPAsyncTCP 1.2.4 e ESPAsyncWebServer 3.1.0: copie essas tres pastas de libraries/ deste repositorio para a pasta de bibliotecas do usuario (Linux: ~/Arduino/libraries; Windows: Documentos\Arduino\libraries). A pasta libraries/AsyncTCP e para ESP32 e nao precisa ser copiada.
    - ESPAsyncWebServer 3.1.0 (fork lacamera): use a copia de libraries/ do repositorio. No Library Manager, a entrada de nome exato ESPAsyncWebServer e essa mesma 3.1.0. NAO instale ESP Async WebServer (ESP32Async) nem ESPAsyncWebSrv: nao foram testadas com este sketch, e a primeira tem um ESPAsyncWebServer.h com o mesmo nome que a IDE pode escolher no lugar da certa.
 6. Compile e envie. Abra o Monitor Serial em 115200 baud; o IP do MeuGuia aparece ali.
