@@ -1,27 +1,53 @@
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266mDNS.h>
+#include <ESPAsyncUDP.h>
+#include <ESPAsyncDNSServer.h>
+#include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
+#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <FS.h>
+#include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
 #include "navegacao.h"
+#include "paginas.h"
 
-const char* WIFI_SSID = "SEU_WIFI";
-const char* WIFI_PASSWORD = "SUA_SENHA";
 const char* NOMINATIM_USER_AGENT = "MeuGuia-ESP8266/1.0";
 
-static const uint8_t GPS_RX_PIN = D1;
-static const uint8_t GPS_TX_PIN = D2;
-static const uint8_t MOTOR_1_PIN = D5;
-static const uint8_t MOTOR_2_PIN = D6;
+static const uint8_t GPS_RX_PIN = D6;
+static const uint8_t GPS_TX_PIN = D5;
+static const uint8_t MOTOR_PIN = D8;
 static const uint32_t INTERVALO_GPS_MS = 1000;
 
 AsyncWebServer server(80);
+AsyncDNSServer dnsServer;
+class CaptiveRequestHandler : public AsyncWebHandler {
+  public:
+    bool canHandle(__unused AsyncWebServerRequest* request) const {
+      return true;
+    }
+    void handleRequest(AsyncWebServerRequest* request) {
+      AsyncResponseStream* response = request->beginResponseStream("text/html");
+      response->print("<!DOCTYPE html><html><head><title>Captive Portal</title></head><body>");
+      response->print("<p>This is out captive portal front page.</p>");
+      response->printf("<p>You were trying to reach: http://%s%s</p>", request->host().c_str(), request->url().c_str());
+#ifndef CONFIG_IDF_TARGET_ESP32H2
+      response->printf("<p>Try opening <a href='http://%s'>this link</a> instead</p>", WiFi.softAPIP().toString().c_str());
+#endif
+      response->print("</body></html>");
+      request->send(response);
+    }
+};
+
+String setEndereco = "";
+String setSsid = "";
+String setPass = "";
+const IPAddress apIP(192, 168, 1, 1);
+const IPAddress netmask(255, 255, 255, 0);
+const byte dnsPort = 53;
+
 SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 TinyGPSPlus gps;
 EstadoNavegacao estadoNavegacao;
@@ -35,55 +61,182 @@ volatile bool buscaPendente = false;
 volatile bool buscando = false;
 String enderecoPendente = "";
 bool ultimaBuscaOk = false;
-
-const char MAIN_PAGE[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MeuGuia</title>
-  <style>
-    body{font-family:Arial,sans-serif;max-width:520px;margin:40px auto;padding:0 18px;line-height:1.5}
-    input,button{box-sizing:border-box;width:100%;padding:12px;margin:8px 0;font-size:16px}
-    button{cursor:pointer} .info{color:#444;font-size:14px}
-  </style>
-</head>
-<body>
-  <h1>MeuGuia</h1>
-  <p>Digite o endereco do ponto de onibus onde deseja descer.</p>
-  <form action="/query" method="get">
-    <label for="rua">Endereco de destino</label>
-    <input type="text" name="rua" id="rua" required placeholder="Rua, numero, cidade">
-    <button type="submit">Definir destino</button>
-  </form>
-  <p class="info">Mantenha o dispositivo conectado ao Wi-Fi do ESP8266. O GPS precisa de sinal de satelite para obter a posicao.</p>
-</body>
-</html>
-)rawliteral";
-
-String codificarURL(const String& texto) {
-  String resultado;
-  const char hex[] = "0123456789ABCDEF";
-  for (size_t i = 0; i < texto.length(); i++) {
-    uint8_t c = (uint8_t)texto[i];
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-        (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~') {
-      resultado += (char)c;
-    } else if (c == ' ') {
-      resultado += "%20";
-    } else {
-      resultado += '%';
-      resultado += hex[c >> 4];
-      resultado += hex[c & 0x0F];
+void onRequest(AsyncWebServerRequest *request){
+  request->send(404);
+}
+String processor(const String& var){
+  if(var == "WIFIPLACEHOLDER"){
+    String status = "Conectado a rede:";
+    status+=WiFi.SSID();
+    status+="<br>";
+    status+=WiFi.localIP().toString();
+    if(WiFi.status() != WL_CONNECTED){
+      status = "Sem conexão";
     }
+    return status;
   }
-  return resultado;
+  if(var == "ENDERECOSALVO"){
+    return ("Endereco atual: %s", enderecoNome());
+  }
+  if(var == "STYLE"){
+    return style;
+  }
+  return String();
+}
+
+String formatURL(String rua){
+  rua.replace(" ", "+");
+  Serial.println(rua);
+  String url = "https://nominatim.openstreetmap.org/search?street=" + rua + "&city=ribeirao+preto&format=json&limit=1";
+  Serial.println(url);
+  return url;
+}
+void requestOSM(String url){
+  if(WiFi.status()==WL_CONNECTED){
+  HTTPClient http;
+  WiFiClientSecure client;
+  client.setInsecure(); 
+  http.addHeader("User-Agent", "MeuGuia (rogeriofilho1105@gmail.com)");
+  Serial.println("requisição para o Nominatim");
+  http.begin(client, url);
+  int httpCode = http.GET();
+  Serial.println(httpCode);
+  if (httpCode > 0) {
+      Serial.printf("[HTTP] Código de resposta: %d\n", httpCode);
+      if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString();        
+        JsonDocument doc; 
+        DeserializationError error = deserializeJson(doc, payload);
+        if (!error) {
+          if (doc.is<JsonArray>() && doc.size() > 0) {
+            JsonObject resultado = doc[0];
+            const char* nome_exibicao = resultado["display_name"];
+            const char* latitude = resultado["lat"];
+            const char* longitude = resultado["lon"];
+            String nome = "endereco.json";
+            Serial.println("--- Resultado Encontrado ---");
+            Serial.printf("Endereço= %s\n", nome_exibicao);
+            Serial.printf("Latitude= %s\n", latitude);
+            Serial.printf("Longitude= %s\n", longitude);
+            saveEndereco(nome, resultado);
+          } else {
+            Serial.println("Nenhum local encontrado para este endereço");
+          }
+        } else {
+          Serial.print("Falha ao ler o JSON: ");
+          Serial.println(error.c_str());
+        }
+      }
+    } else {
+      Serial.printf("[HTTP] Falha na requisição: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
+    setEndereco = "";
+    delay(1000); 
+  }
+}
+bool saveEndereco(String path, JsonObject resultado) {
+    File file = SPIFFS.open(path, "w");
+    if (!file) {
+        return false;
+    }
+
+    if (serializeJson(resultado, file) == 0) {
+        file.close();
+        return false;
+    }
+    file.close();
+    return true;
+}
+bool readEndereco() {
+    File file = SPIFFS.open("endereco.json", "r");
+    if (!file) {
+        return false;
+    }
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    if (error) {
+        file.close();
+        return false;
+    }
+    file.close();
+    destinoLat = doc["lat"];
+    destinoLng = doc["lon"];
+    return true;
+}
+String enderecoNome(){
+    File file = SPIFFS.open("endereco.json", "r");
+    if (!file) {
+        Serial.println("Failed to open file for reading");
+    }
+    // Deserialize JSON
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    if (error) {
+        Serial.print("Failed to parse JSON: ");
+        Serial.println(error.c_str());
+    }
+    String nome = doc["display_name"];
+    file.close();
+    return nome;
+}
+void listFiles(){
+  Dir dir = SPIFFS.openDir("/endereco");
+  while (dir.next()) {
+    Serial.print("File: ");
+    Serial.print(dir.fileName());
+    delay(1000);
+  }
+}
+JsonDocument readConfig(){
+    File file = SPIFFS.open("Config.json", "r");
+    if (!file) {
+        Serial.println("Failed to open file for reading");
+    }
+    // Deserialize JSON
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    if (error) {
+        Serial.print("Failed to parse JSON: ");
+        Serial.println(error.c_str());
+    }
+    file.close();
+    return doc;
+}
+
+bool saveConfig() {
+    StaticJsonDocument<256> doc;
+    doc["SSID"] = setSsid;
+    doc["password"] = setPass;
+    File file = SPIFFS.open("Config.json", "w");
+    if (!file) {
+        Serial.println("Failed to open file for writing");
+        return false;
+    }
+
+    if (serializeJson(doc, file) == 0) {
+        Serial.println("Failed to write JSON to file");
+        file.close();
+        return false;
+    }
+    file.close();
+    Serial.println("JSON saved successfully");
+    return true;
+}
+
+void wifiConnect(){
+  JsonDocument wifi;
+  if(SPIFFS.open("Config.json", "r")){
+    wifi = readConfig();
+  }
+  else saveConfig();
+  const char *ssid = wifi["SSID"];
+  const char *password = wifi["password"]; 
+  WiFi.begin(ssid, password);
 }
 
 void pararVibracao() {
-  digitalWrite(MOTOR_1_PIN, LOW);
-  digitalWrite(MOTOR_2_PIN, LOW);
+  digitalWrite(MOTOR_PIN, LOW);
 }
 
 void atualizarVibracao(NivelProximidade nivel) {
@@ -131,8 +284,7 @@ void atualizarVibracao(NivelProximidade nivel) {
 
   if (pulso < quantidade) {
     if (pulso == 0 || agora - transicaoMs >= intervaloPulso) {
-      digitalWrite(MOTOR_1_PIN, HIGH);
-      digitalWrite(MOTOR_2_PIN, HIGH);
+      digitalWrite(MOTOR_PIN, HIGH);
       vibrando = true;
       transicaoMs = agora;
     }
@@ -143,131 +295,72 @@ void atualizarVibracao(NivelProximidade nivel) {
   }
 }
 
-bool consultarEndereco(const String& endereco) {
-  if (WiFi.status() != WL_CONNECTED) return false;
-
-  String url = "https://nominatim.openstreetmap.org/search?q=" + codificarURL(endereco) + "&format=json&limit=1";
-  WiFiClientSecure client;
-  client.setInsecure();
-  HTTPClient http;
-  http.setTimeout(12000);
-  http.begin(client, url);
-  http.setUserAgent(NOMINATIM_USER_AGENT);
-  Serial.println("Consultando geocodificacao do endereco...");
-  int codigoHTTP = http.GET();
-  bool sucesso = false;
-
-  if (codigoHTTP == HTTP_CODE_OK) {
-    String payload = http.getString();
-    JsonDocument doc;
-    DeserializationError erro = deserializeJson(doc, payload);
-    if (!erro && doc.is<JsonArray>() && doc.size() > 0) {
-      JsonObject item = doc[0];
-      destinoLat = String((const char*)item["lat"]).toDouble();
-      destinoLng = String((const char*)item["lon"]).toDouble();
-      enderecoDestino = endereco;
-      iniciar_navegacao(&estadoNavegacao, destinoLat, destinoLng);
-      destinoConfigurado = true;
-      nivelAnterior = NIVEL_LONGE;
-      sucesso = true;
-      Serial.println("Destino definido: " + enderecoDestino);
-      Serial.printf("Latitude: %.6f | Longitude: %.6f\n", destinoLat, destinoLng);
-    } else {
-      Serial.println("Endereco nao encontrado ou resposta JSON invalida.");
-    }
-  } else {
-    Serial.printf("Falha na consulta HTTP: %d\n", codigoHTTP);
-  }
-  http.end();
-  return sucesso;
-}
-
-void configurarRotasWeb() {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html; charset=utf-8", MAIN_PAGE);
-  });
-
-  server.on("/query", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (!request->hasParam("rua")) {
-      request->send(400, "text/plain; charset=utf-8", "Informe o endereco usando o campo rua.");
-      return;
-    }
-    String endereco = request->getParam("rua")->value();
-    endereco.trim();
-    if (endereco.length() == 0) {
-      request->send(400, "text/plain; charset=utf-8", "O endereco nao pode ficar vazio.");
-      return;
-    }
-
-    enderecoPendente = endereco;
-    buscaPendente = true;
-    request->send(200, "text/html; charset=utf-8", "<meta charset='UTF-8'><meta http-equiv='refresh' content='3;url=/resultado'><h2>Buscando o endereco...</h2><p>Aguarde alguns segundos.</p>");
-  });
-
-  server.on("/resultado", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (buscaPendente || buscando) {
-      request->send(200, "text/html; charset=utf-8", "<meta charset='UTF-8'><meta http-equiv='refresh' content='3'><h2>Ainda buscando o endereco...</h2>");
-      return;
-    }
-    if (ultimaBuscaOk) {
-      String resposta = "<!DOCTYPE html><html lang='pt-BR'><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><body><h2>Destino configurado</h2><p>";
-      resposta += enderecoDestino;
-      resposta += "</p><p>Latitude: " + String(destinoLat, 6) + "<br>Longitude: " + String(destinoLng, 6) + "</p><a href='/'>Voltar</a></body></html>";
-      request->send(200, "text/html; charset=utf-8", resposta);
-    } else {
-      request->send(502, "text/html; charset=utf-8", "<meta charset='UTF-8'><h2>Nao foi possivel encontrar o endereco.</h2><p>Verifique o endereco e a conexao Wi-Fi.</p><a href='/'>Tentar novamente</a>");
-    }
-  });
-}
-
 void setup() {
-  pinMode(MOTOR_1_PIN, OUTPUT);
-  pinMode(MOTOR_2_PIN, OUTPUT);
+  pinMode(MOTOR_PIN, OUTPUT);
+  digitalWrite(MOTOR_PIN, HIGH);
+  delay(3000);
   pararVibracao();
-
   Serial.begin(115200);
   gpsSerial.begin(9600);
-  Serial.println();
-  Serial.println("Iniciando MeuGuia...");
-
-  WiFi.mode(WIFI_STA);
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Conectando ao Wi-Fi");
-  uint32_t inicioWiFi = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - inicioWiFi < 20000) {
-    delay(250);
-    Serial.print('.');
-    yield();
+  if (!SPIFFS.begin()) {
+    Serial.println("SPIFFS falhou ao iniciar");
+    return;
   }
-  Serial.println();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.print("IP do MeuGuia: ");
-    Serial.println(WiFi.localIP());
-    if (MDNS.begin("meuguia")) Serial.println("Acesse http://meuguia.local (se suportado) ou use o IP acima.");
-  } else {
-    Serial.println("Wi-Fi nao conectado. Reinicie depois de conferir SSID e senha.");
+  destinoConfigurado = readEndereco();
+  JsonDocument wifi;
+  wifiConnect();
+  unsigned long startAttempt = millis();
+  const unsigned long timeout = 8000;
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < timeout) {
+    Serial.print(".");
+    delay(500);
   }
-
-  configurarRotasWeb();
+  WiFi.softAPConfig(apIP, apIP, netmask);
+  WiFi.softAP("MeuGUIA", "");
+  dnsServer.start(dnsPort, "*", apIP);
+  WiFi.setSleep(false);
+  server.on("/", HTTP_ANY, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html; charset=utf-8", mainPage, processor);
+  });
+  server.on("/config", HTTP_ANY, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html; charset=utf-8", configPage, processor);
+  });
+  server.on("/endereco", HTTP_ANY, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html; charset=utf-8", enderecoPage, processor);
+  });
+  server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (request->hasParam("ssid")) {
+      setSsid = request->getParam("ssid")->value();
+      Serial.print(setSsid);
+    }
+    if (request->hasParam("pass")) {
+      setPass = request->getParam("pass")->value();
+      Serial.print(setPass);
+    }
+      request->redirect("/");
+  });
+  server.on("/query", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (request->hasParam("rua")) {
+      setEndereco = request->getParam("rua")->value();
+      Serial.print(setEndereco);
+    }
+  request->redirect("/");
+  });
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
   server.begin();
-  Serial.println("Servidor web iniciado.");
+  Serial.println(destinoConfigurado);
 }
 
 void loop() {
-  if (buscaPendente) {
-    String endereco = enderecoPendente;
-    buscaPendente = false;
-    buscando = true;
-    pararVibracao();
-    ultimaBuscaOk = consultarEndereco(endereco);
-    buscando = false;
+  if(setEndereco!=""){
+    String url = formatURL(setEndereco);
+    requestOSM(url);
   }
-
+  if(setSsid!=""){
+    saveConfig();
+    wifiConnect();
+  }
   while (gpsSerial.available() > 0) gps.encode(gpsSerial.read());
-  MDNS.update();
-
   uint32_t agora = millis();
   if (destinoConfigurado && gps.location.isValid() && gps.location.isUpdated() &&
       (agora - ultimaLeituraGPS >= INTERVALO_GPS_MS)) {
@@ -275,6 +368,7 @@ void loop() {
     double latitude = gps.location.lat();
     double longitude = gps.location.lng();
     double distancia = distancia_metros(latitude, longitude, destinoLat, destinoLng);
+    Serial.println(latitude);
     NivelProximidade nivel = atualizar_navegacao(&estadoNavegacao, latitude, longitude, agora);
 
     Serial.printf("GPS: %.6f, %.6f | Distancia: %.1f m | Nivel: %d\n", latitude, longitude, distancia, (int)nivel);
