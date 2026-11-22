@@ -19,6 +19,7 @@ const char* NOMINATIM_USER_AGENT = "MeuGuia-ESP8266/1.0";
 static const uint8_t GPS_RX_PIN = D6;
 static const uint8_t GPS_TX_PIN = D5;
 static const uint8_t MOTOR_PIN = D8;
+static const uint8_t BUTTON_PIN = D1;
 static const uint32_t INTERVALO_GPS_MS = 1000;
 
 AsyncWebServer server(80);
@@ -221,6 +222,7 @@ bool saveConfig() {
     }
     file.close();
     Serial.println("JSON saved successfully");
+    setSsid = setPass = "";
     return true;
 }
 
@@ -294,11 +296,20 @@ void atualizarVibracao(NivelProximidade nivel) {
     inicioCiclo = agora;
   }
 }
-
+void openServer(){
+  Serial.println("Starting server");
+  wifiConnect();
+  WiFi.softAPConfig(apIP, apIP, netmask);
+  WiFi.softAP("MeuGUIA", "");
+  dnsServer.start(dnsPort, "*", apIP);
+  WiFi.setSleep(false);
+  server.begin();
+}
 void setup() {
   pinMode(MOTOR_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT);
   digitalWrite(MOTOR_PIN, HIGH);
-  delay(3000);
+  delay(5000);
   pararVibracao();
   Serial.begin(115200);
   gpsSerial.begin(9600);
@@ -307,18 +318,7 @@ void setup() {
     return;
   }
   destinoConfigurado = readEndereco();
-  JsonDocument wifi;
-  wifiConnect();
-  unsigned long startAttempt = millis();
-  const unsigned long timeout = 8000;
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < timeout) {
-    Serial.print(".");
-    delay(500);
-  }
-  WiFi.softAPConfig(apIP, apIP, netmask);
-  WiFi.softAP("MeuGUIA", "");
-  dnsServer.start(dnsPort, "*", apIP);
-  WiFi.setSleep(false);
+  Serial.println(destinoConfigurado);
   server.on("/", HTTP_ANY, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html; charset=utf-8", mainPage, processor);
   });
@@ -347,11 +347,12 @@ void setup() {
   request->redirect("/");
   });
   server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
-  server.begin();
-  Serial.println(destinoConfigurado);
 }
 
 void loop() {
+  if(digitalRead(BUTTON_PIN) == HIGH){
+    openServer();
+  }
   if(setEndereco!=""){
     String url = formatURL(setEndereco);
     requestOSM(url);
@@ -360,6 +361,7 @@ void loop() {
     saveConfig();
     wifiConnect();
   }
+
   while (gpsSerial.available() > 0) gps.encode(gpsSerial.read());
   uint32_t agora = millis();
   if (destinoConfigurado && gps.location.isValid() && gps.location.isUpdated() &&
@@ -368,7 +370,6 @@ void loop() {
     double latitude = gps.location.lat();
     double longitude = gps.location.lng();
     double distancia = distancia_metros(latitude, longitude, destinoLat, destinoLng);
-    Serial.println(latitude);
     NivelProximidade nivel = atualizar_navegacao(&estadoNavegacao, latitude, longitude, agora);
 
     Serial.printf("GPS: %.6f, %.6f | Distancia: %.1f m | Nivel: %d\n", latitude, longitude, distancia, (int)nivel);
